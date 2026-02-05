@@ -1,6 +1,6 @@
 cambiare testi
 
-- al posti di ordini -> preventivi
+- al posto di ordini -> preventivi
 - e note preventivo
 - ricerca in nuvo preventivo per cliente e modello 
 
