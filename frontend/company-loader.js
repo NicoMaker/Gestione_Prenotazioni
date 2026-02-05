@@ -74,6 +74,16 @@ function insertCompanyInfoSidebar() {
   pivaElements.forEach(el => {
     el.textContent = company.piva;
   });
+
+  // Header di stampa nella home
+  const printAddress = document.querySelector('.company-print-address');
+  const printPivaValue = document.querySelector('.company-print-piva-value');
+  if (printAddress) {
+    printAddress.textContent = `${company.address}, ${company.cap} ${company.city} (${company.province})`;
+  }
+  if (printPivaValue) {
+    printPivaValue.textContent = company.piva;
+  }
   
   console.log('✅ Info aziendali inserite nella sidebar');
 }

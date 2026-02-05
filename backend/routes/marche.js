@@ -2,10 +2,21 @@ const express = require('express');
 const { db } = require('../db/init');
 const router = express.Router();
 
-// Get all marche
+// Get all marche with conteggio modelli (prodotti relazionati)
 router.get('/', (req, res) => {
-  db.all('SELECT * FROM marche ORDER BY nome', (err, rows) => {
+  const query = `
+    SELECT 
+      ma.*,
+      COUNT(DISTINCT mo.id) AS prodotti_count
+    FROM marche ma
+    LEFT JOIN modelli mo ON mo.marche_id = ma.id
+    GROUP BY ma.id, ma.nome, ma.created_at
+    ORDER BY ma.nome
+  `;
+
+  db.all(query, (err, rows) => {
     if (err) {
+      console.error('Errore caricamento marche:', err);
       return res.status(500).json({ error: 'Errore del server' });
     }
     res.json(rows);

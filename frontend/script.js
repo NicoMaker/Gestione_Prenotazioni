@@ -89,6 +89,30 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.removeItem("activeSection");
     window.location.href = "index.html";
   });
+
+  // Sincronizzazione Marca / Modello negli ordini
+  const ordineMarcaSelect = document.getElementById("ordineMarca");
+  const ordineModelloSelect = document.getElementById("ordineModello");
+
+  if (ordineMarcaSelect && ordineModelloSelect) {
+    ordineMarcaSelect.addEventListener("change", () => {
+      const marcaId = ordineMarcaSelect.value;
+      populateOrdineModelliByMarca(marcaId);
+      // quando cambio marca, azzero il modello
+      ordineModelloSelect.value = "";
+    });
+
+    ordineModelloSelect.addEventListener("change", () => {
+      const modelloId = ordineModelloSelect.value;
+      if (!modelloId) return;
+      const modello = allModelli.find(
+        (m) => String(m.id) === String(modelloId)
+      );
+      if (modello && modello.marche_id) {
+        ordineMarcaSelect.value = String(modello.marche_id);
+      }
+    });
+  }
 });
 
 // ==================== CLIENTI ====================
@@ -452,19 +476,38 @@ async function loadMarcheForSelect() {
 async function loadModelliForSelect() {
   try {
     const res = await fetch(`${API_URL}/modelli`);
-    const modelli = await res.json();
-    const select = document.getElementById("ordineModello");
-    select.innerHTML =
-      '<option value="">Seleziona modello</option>' +
-      modelli
-        .map(
-          (m) =>
-            `<option value="${m.id}">${m.nome}${m.marca_nome ? ` (${m.marca_nome})` : ""}</option>`
-        )
-        .join("");
+    allModelli = await res.json();
+    const currentMarcaId =
+      document.getElementById("ordineMarca")?.value || "";
+    populateOrdineModelliByMarca(currentMarcaId);
   } catch (error) {
     console.error("Errore caricamento modelli:", error);
   }
+}
+
+// Popola la select dei modelli filtrando per marca (se presente)
+function populateOrdineModelliByMarca(marcaId) {
+  const select = document.getElementById("ordineModello");
+  if (!select) return;
+
+  const source = Array.isArray(allModelli) ? allModelli : [];
+  const filtered =
+    marcaId && marcaId !== ""
+      ? source.filter(
+          (m) => m.marche_id && String(m.marche_id) === String(marcaId)
+        )
+      : source;
+
+  select.innerHTML =
+    '<option value="">Seleziona modello</option>' +
+    filtered
+      .map(
+        (m) =>
+          `<option value="${m.id}">${m.nome}${
+            m.marca_nome ? ` (${m.marca_nome})` : ""
+          }</option>`
+      )
+      .join("");
 }
 
 function editOrdine(id) {
@@ -499,6 +542,26 @@ document.getElementById("formOrdine").addEventListener("submit", async (e) => {
   const marca_id = document.getElementById("ordineMarca").value || null;
   const modello_id = document.getElementById("ordineModello").value || null;
   const note = document.getElementById("ordineNote").value.trim();
+
+  // Validazione coerenza Marca/Modello lato frontend
+  if (modello_id) {
+    const modello = allModelli.find(
+      (m) => String(m.id) === String(modello_id)
+    );
+    if (!modello) {
+      showNotification("Modello selezionato non valido.", "error");
+      return;
+    }
+    if (marca_id && modello.marche_id) {
+      if (String(modello.marche_id) !== String(marca_id)) {
+        showNotification(
+          "Il modello selezionato non appartiene alla marca indicata.",
+          "error"
+        );
+        return;
+      }
+    }
+  }
 
   const method = id ? "PUT" : "POST";
   const url = id ? `${API_URL}/ordini/${id}` : `${API_URL}/ordini`;
@@ -552,7 +615,7 @@ function renderMarche() {
 
   if (marche.length === 0) {
     tbody.innerHTML =
-      '<tr><td colspan="2" class="text-center">Nessuna marca presente</td></tr>';
+      '<tr><td colspan="3" class="text-center">Nessuna marca presente</td></tr>';
     return;
   }
 
@@ -561,6 +624,13 @@ function renderMarche() {
       (m) => `
     <tr>
       <td><strong>${m.nome}</strong></td>
+      <td class="text-center-badge">
+        <span class="prodotti-badge ${
+          m.prodotti_count > 0 ? "has-products" : "empty"
+        }">
+          ${m.prodotti_count || 0}
+        </span>
+      </td>
       <td class="text-right">
         <button class="btn-icon" onclick="editMarca(${m.id})">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -947,19 +1017,20 @@ document
 function formatDate(dateString) {
   if (!dateString) return "-";
   const date = new Date(dateString);
-  return date.toLocaleString("it-IT", {
+  return date.toLocaleDateString("it-IT", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
   });
 }
 
 function formatDateForInput(dateString) {
   if (!dateString) return "";
   const date = new Date(dateString);
-  return date.toISOString().slice(0, 16);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function showNotification(message, type = "info", duration = 5000) {
