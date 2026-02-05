@@ -1442,3 +1442,54 @@ async function printOrdiniDiretta() {
 
 // Esposizione globale
 window.printOrdiniDiretta = printOrdiniDiretta;
+
+/**
+ * 🖨️ STAMPA DIRETTA - SOLO DIALOG STAMPA (niente web, niente sostituzione pagina)
+ */
+async function printOrdiniDiretta() {
+  try {
+    console.log('🖨️ Preparazione stampa diretta...');
+    
+    if (!allOrdini || !allOrdini.length) {
+      showNotification('Nessun ordine da stampare', 'warning');
+      return;
+    }
+
+    const companyInfo = await loadCompanyInfoForPrint();
+    
+    // Crea un FRAME INVISIBILE per la stampa
+    const printFrame = document.createElement('iframe');
+    printFrame.style.position = 'absolute';
+    printFrame.style.left = '-9999px';
+    printFrame.style.width = '0';
+    printFrame.style.height = '0';
+    printFrame.style.border = '0';
+    document.body.appendChild(printFrame);
+    
+    // Genera HTML nel frame nascosto
+    const htmlPrint = generatePrintDocumentOrdiniPerCliente(allOrdini, companyInfo);
+    printFrame.contentDocument.open();
+    printFrame.contentDocument.write(htmlPrint);
+    printFrame.contentDocument.close();
+    
+    // Aspetta caricamento e STAMPA DIRETTAMENTE
+    printFrame.onload = () => {
+      setTimeout(() => {
+        printFrame.contentWindow.print();
+        // Rimuovi frame dopo stampa
+        setTimeout(() => {
+          document.body.removeChild(printFrame);
+        }, 1000);
+      }, 250);
+    };
+    
+    showNotification('🖨️ Dialog stampa aperto!', 'success');
+    
+  } catch (err) {
+    console.error('❌ Errore stampa:', err);
+    showNotification('Errore nella stampa', 'error');
+  }
+}
+
+// Esposizione globale
+window.printOrdiniDiretta = printOrdiniDiretta;
