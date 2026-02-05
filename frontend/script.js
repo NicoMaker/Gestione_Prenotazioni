@@ -1051,3 +1051,4 @@ function showNotification(message, type = "info", duration = 5000) {
     }, 300);
   }, duration);
 }
+
