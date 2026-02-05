@@ -1052,3 +1052,393 @@ function showNotification(message, type = "info", duration = 5000) {
   }, duration);
 }
 
+
+// ==================== STAMPA ORDINI PER CLIENTE ====================
+
+// riuso lo stesso JSON di company-loader.js, se già lo carichi lì
+let companyInfoPrintCache = null;
+
+/**
+ * Carica le info aziendali per la stampa (riusa company-info.json)
+ */
+async function loadCompanyInfoForPrint() {
+  try {
+    if (companyInfoPrintCache) return companyInfoPrintCache;
+
+    // se hai già companyInfo globale da company-loader.js puoi fare:
+    if (typeof companyInfo !== 'undefined' && companyInfo) {
+      companyInfoPrintCache = companyInfo;
+      return companyInfoPrintCache;
+    }
+
+    const response = await fetch('company-info.json');
+    if (!response.ok) {
+      throw new Error(`Errore caricamento: ${response.status}`);
+    }
+    companyInfoPrintCache = await response.json();
+    console.log('✅ Company info caricato per stampa:', companyInfoPrintCache);
+    return companyInfoPrintCache;
+  } catch (error) {
+    console.error('❌ Errore caricamento company-info.json (stampa):', error);
+    // fallback
+    companyInfoPrintCache = {
+      company: {
+        name: 'Magazzino Moto',
+        address: 'Via prova 123',
+        city: 'Milano',
+        cap: '20100',
+        province: 'MI',
+        country: 'Italia',
+        piva: '1234567890',
+        phone: '+39 02 1234567',
+        email: 'info@magazzinomoto.it',
+        website: 'www.magazzinomoto.it',
+        logo: 'img/Logo.png',
+      },
+      settings: {
+        currency: 'EUR',
+        currencySymbol: '€',
+        dateFormat: 'DD/MM/YYYY',
+        decimalSeparator: ',',
+        thousandsSeparator: '.',
+      },
+    };
+    return companyInfoPrintCache;
+  }
+}
+
+/**
+ * Raggruppa gli ordini per cliente_id
+ */
+function groupOrdiniByCliente(ordini) {
+  return ordini.reduce((groups, ordine) => {
+    const clienteId = ordine.cliente_id;
+    if (!groups[clienteId]) {
+      groups[clienteId] = [];
+    }
+    groups[clienteId].push(ordine);
+    return groups;
+  }, {});
+}
+
+/**
+ * Ordina gli ordini di un cliente per data decrescente
+ */
+function sortOrdiniByDateDesc(ordini) {
+  return [...ordini].sort((a, b) => {
+    const dateA = new Date(a.data_movimento);
+    const dateB = new Date(b.data_movimento);
+    return dateB - dateA; // più recente prima
+  });
+}
+
+/**
+ * Piccolo helper se vuoi una formatData separata
+ */
+function formatDataItStampa(dateString) {
+  if (!dateString) return '-';
+  const d = new Date(dateString);
+  return d.toLocaleDateString('it-IT', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+}
+
+/**
+ * Intestazione HTML del PDF con logo e dati aziendali (presi da company-info)
+ */
+function generatePrintHeader(company) {
+  return `
+    <div class="print-header" style="text-align:center;margin-bottom:30px;border-bottom:2px solid #333;padding-bottom:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <div style="flex:1;text-align:left;">
+          <img src="${company.logo || 'img/Logo.png'}" alt="Logo" style="max-height:60px;width:auto;">
+        </div>
+        <div style="flex:2;text-align:center;">
+          <h1 style="margin:0;font-size:24px;font-weight:bold;color:#000;">${company.name || 'MAGAZZINO'}</h1>
+          <p style="margin:5px 0;font-size:12px;color:#666;">Registrazione ordini per cliente</p>
+        </div>
+        <div style="flex:1;"></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;text-align:left;font-size:11px;color:#333;">
+        <div>
+          <p style="margin:3px 0;"><strong>Indirizzo:</strong> ${company.address || '-'}</p>
+          <p style="margin:3px 0;"><strong>Città:</strong> ${company.cap || ''} ${company.city || ''} (${company.province || ''})</p>
+          <p style="margin:3px 0;"><strong>Paese:</strong> ${company.country || 'Italia'}</p>
+        </div>
+        <div>
+          <p style="margin:3px 0;"><strong>P.IVA:</strong> ${company.piva || '-'}</p>
+          <p style="margin:3px 0;"><strong>Telefono:</strong> ${company.phone || '-'}</p>
+          <p style="margin:3px 0;"><strong>Email:</strong> ${company.email || '-'}</p>
+        </div>
+      </div>
+
+      <p style="margin-top:10px;font-size:10px;color:#999;">
+        Stampato il: ${formatDataItStampa(new Date().toISOString())}
+      </p>
+    </div>
+  `;
+}
+
+/**
+ * Sezione HTML per un singolo cliente (ordini già passati e ordinati per data)
+ */
+function generateClienteSection(cliente, ordiniCliente) {
+  const ordiniOrdinati = sortOrdiniByDateDesc(ordiniCliente);
+
+  return `
+    <div class="cliente-section" style="margin-bottom:30px;page-break-inside:avoid;">
+      <div style="background-color:#f5f5f5;padding:12px;border-radius:4px;margin-bottom:15px;border-left:4px solid #2980b9;">
+        <h2 style="margin:0;font-size:16px;font-weight:bold;color:#2980b9;">
+          ${cliente.nome || 'N/A'}
+        </h2>
+        <p style="margin:5px 0 0 0;font-size:12px;color:#666;">
+          ${cliente.num_tel || '-'} | ${cliente.email || '-'}
+        </p>
+        <p style="margin:3px 0 0 0;font-size:10px;color:#999;">
+          Totale ordini: ${ordiniOrdinati.length}
+        </p>
+      </div>
+
+      <table style="width:100%;border-collapse:collapse;font-size:11px;">
+        <thead>
+          <tr style="background-color:#ecf0f1;border-bottom:2px solid #34495e;">
+            <th style="padding:8px;text-align:left;border:1px solid #bdc3c7;">Data</th>
+            <th style="padding:8px;text-align:left;border:1px solid #bdc3c7;">Marca</th>
+            <th style="padding:8px;text-align:left;border:1px solid #bdc3c7;">Modello</th>
+            <th style="padding:8px;text-align:left;border:1px solid #bdc3c7;">Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${ordiniOrdinati
+            .map(
+              (o, i) => `
+            <tr style="border-bottom:1px solid #ecf0f1;${i % 2 === 0 ? 'background-color:#fafafa;' : ''}">
+              <td style="padding:8px;border:1px solid #ecf0f1;font-weight:bold;">
+                ${formatDataItStampa(o.data_movimento)}
+              </td>
+              <td style="padding:8px;border:1px solid #ecf0f1;">
+                ${o.marca_nome || '-'}
+              </td>
+              <td style="padding:8px;border:1px solid #ecf0f1;">
+                ${o.modello_nome || '-'}
+              </td>
+              <td style="padding:8px;border:1px solid #ecf0f1;">
+                ${o.note || '-'}
+              </td>
+            </tr>
+          `,
+            )
+            .join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+/**
+ * Genera l'HTML completo per la stampa (raggruppato per cliente)
+ * - clienti in ordine alfabetico
+ * - ordini interni in ordine di data decrescente
+ */
+function generatePrintDocumentOrdiniPerCliente(ordini, companyWrapper) {
+  const company = companyWrapper.company || companyWrapper; // compatibile con company-info.json
+
+  const gruppi = groupOrdiniByCliente(ordini);
+
+  // lista di clienti unici (id, nome, tel, email), ordinati per nome
+  const clientiUnici = Array.from(
+    new Set(
+      ordini.map((o) =>
+        JSON.stringify({
+          id: o.cliente_id,
+          nome: o.cliente_nome,
+          num_tel: o.cliente_tel,
+          email: o.cliente_email,
+        }),
+      ),
+    ),
+  )
+    .map((s) => JSON.parse(s))
+    .sort((a, b) => a.nome.localeCompare(b.nome, 'it'));
+
+  const header = generatePrintHeader(company);
+
+  const bodyClienti = clientiUnici
+    .map((c) => {
+      const ordiniCliente = gruppi[c.id] || [];
+      return generateClienteSection(c, ordiniCliente);
+    })
+    .join('');
+
+  return `
+    <!DOCTYPE html>
+    <html lang="it">
+      <head>
+        <meta charset="UTF-8" />
+        <title>Stampa Ordini per Cliente</title>
+        <style>
+          body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #fff;
+            margin: 0;
+            padding: 0;
+          }
+          .print-container {
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 20mm;
+            background-color: #fff;
+          }
+          @media print {
+            body {
+              margin: 0;
+              padding: 0;
+            }
+            .print-container {
+              max-width: 100%;
+              padding: 0;
+              margin: 0;
+            }
+            .cliente-section {
+              page-break-inside: avoid;
+              margin-bottom: 40px;
+            }
+          }
+          .timestamp {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 10px;
+            color: #999;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="print-container">
+          ${header}
+          ${bodyClienti}
+          <div class="timestamp">
+            Documento generato il: ${new Date().toLocaleString('it-IT')}
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+}
+
+/**
+ * Funzione principale: apre la finestra di stampa con ordini per cliente
+ * - usa allOrdini già caricati da loadOrdini()
+ */
+async function printOrdiniPerCliente(ordiniInput) {
+  try {
+    console.log('🚀 Inizio generazione stampa ordini per cliente...');
+    const ordiniDaStampare = ordiniInput || allOrdini;
+
+    if (!ordiniDaStampare || !ordiniDaStampare.length) {
+      showNotification('Nessun ordine da stampare', 'warning');
+      return;
+    }
+
+    const companyInfo = await loadCompanyInfoForPrint();
+    const html = generatePrintDocumentOrdiniPerCliente(ordiniDaStampare, companyInfo);
+
+    const w = window.open('', '_blank');
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+
+    w.onload = () => {
+      setTimeout(() => {
+        w.print();
+      }, 250);
+    };
+
+    console.log('✅ Finestra di stampa aperta');
+  } catch (err) {
+    console.error('❌ Errore nella stampa ordini per cliente:', err);
+    showNotification('Errore nella generazione della stampa', 'error');
+  }
+}
+
+// ==================== FUNZIONE EXPORT PDF (bonus) ====================
+async function exportOrdiniPDF() {
+  try {
+    console.log('📥 Inizio export PDF ordini...');
+    const ordiniDaEsportare = allOrdini;
+    
+    if (!ordiniDaEsportare || ordiniDaEsportare.length === 0) {
+      showNotification('Nessun ordine da esportare', 'warning');
+      return;
+    }
+    
+    const companyInfo = await loadCompanyInfoForPrint();
+    const html = generatePrintDocumentOrdiniPerCliente(ordiniDaEsportare, companyInfo);
+    
+    // Crea file HTML scaricabile (l'utente lo apre e stampa/salva come PDF)
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `ordini_per_cliente_${formatDataItStampa(new Date())}.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    showNotification('✅ File HTML scaricato! Aprilo e salva come PDF', 'success');
+  } catch (error) {
+    console.error('❌ Errore export PDF:', error);
+    showNotification('Errore nell\'export del file', 'error');
+  }
+}
+
+// ==================== AUTO-CARICA ORDINI ALL'AVVIO SEZIONE ORDINI ====================
+document.addEventListener('DOMContentLoaded', () => {
+  // Se l'utente apre direttamente sulla sezione ordini, carica subito
+  const savedSection = localStorage.getItem('activeSection') || 'clienti';
+  if (savedSection === 'ordini') {
+    setTimeout(() => {
+      loadOrdini();
+      addPrintButtonsToOrdiniSection(); // se hai questa funzione
+    }, 500);
+  }
+});
+
+/**
+ * 🖨️ STAMPA DIRETTA - sostituisce contenuto e chiama window.print()
+ */
+async function printOrdiniDiretta() {
+  try {
+    console.log('🖨️ Stampa diretta ordini per cliente...');
+    
+    if (!allOrdini || !allOrdini.length) {
+      showNotification('Nessun ordine da stampare', 'warning');
+      return;
+    }
+
+    const companyInfo = await loadCompanyInfoForPrint();
+    const htmlPrint = generatePrintDocumentOrdiniPerCliente(allOrdini, companyInfo);
+    
+    // Sostituisce TUTTO il contenuto della pagina con la stampa
+    document.body.innerHTML = htmlPrint;
+    
+    // Stampa immediatamente
+    setTimeout(() => {
+      window.print();
+    }, 100);
+    
+  } catch (err) {
+    console.error('❌ Errore stampa diretta:', err);
+    showNotification('Errore nella stampa', 'error');
+  }
+}
+
+// Esposizione globale
+window.printOrdiniDiretta = printOrdiniDiretta;

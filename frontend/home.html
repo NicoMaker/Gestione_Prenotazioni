@@ -251,58 +251,70 @@
         </section>
 
         <!-- Sezione ORDINI -->
-        <section id="section-ordini" class="content-section">
-          <div class="section-header">
-            <div>
-              <h1>Gestione Ordini</h1>
-              <p>Visualizza e gestisci gli ordini</p>
-            </div>
-            <div class="filter-controls">
-              <input
-                type="text"
-                id="filterOrdini"
-                class="filter-input"
-                placeholder="Cerca per cliente, marca, modello..."
-              />
-              <button class="btn btn-primary" onclick="openOrdineModal()">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                <span>Nuovo Ordine</span>
-              </button>
-            </div>
-          </div>
+<!-- Sezione ORDINI -->
+<section id="section-ordini" class="content-section">
+  <div class="section-header">
+    <div>
+      <h1>Gestione Ordini</h1>
+      <p>Visualizza e gestisci gli ordini</p>
+    </div>
+    <div class="filter-controls">
+      <!-- 🔍 Campo ricerca -->
+      <div class="search-wrapper">
+        <input type="text" id="filterOrdini" class="filter-input" 
+               placeholder="Cerca per cliente, marca, modello..." />
+      </div>
 
-          <div class="card">
-            <div class="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Data</th>
-                    <th>Cliente</th>
-                    <th>Marca</th>
-                    <th>Modello</th>
-                    <th>Note</th>
-                    <th class="text-right">Azioni</th>
-                  </tr>
-                </thead>
-                <tbody id="ordiniTableBody">
-                  <tr>
-                    <td colspan="6" class="text-center">
-                      <span>Caricamento...</span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
+      <!-- 🖨️ BOTTONE STAMPA PER CLIENTE (PRIMARIO) -->
+      <button type="button" class="btn btn-secondary" onclick="printOrdiniPerCliente()" 
+              title="Stampa ordini raggruppati per cliente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 19h4V9H6v10z"/>
+          <path d="M14 19h4V9h-4v10z"/>
+          <path d="M18 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"/>
+          <polyline points="18,9 12,15 6,9"/>
+        </svg>
+        <span>Stampa per Cliente</span>
+      </button>
+
+
+      <!-- ➕ BOTTONE NUOVO ORDINE -->
+      <button class="btn btn-primary" onclick="openOrdineModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="15" x2="12" y2="19"></line>
+          <line x1="15" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span>Nuovo Ordine</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 📊 TABELLA ORDINI -->
+  <div class="card">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Cliente</th>
+            <th>Marca</th>
+            <th>Modello</th>
+            <th>Note</th>
+            <th class="text-right">Azioni</th>
+          </tr>
+        </thead>
+        <tbody id="ordiniTableBody">
+          <tr>
+            <td colspan="6" class="text-center">
+              <span>Caricamento...</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
 
         <!-- Sezione MARCHE -->
         <section id="section-marche" class="content-section">
@@ -654,33 +666,57 @@
             </svg>
           </button>
         </div>
-<form id="formUtente">
-  <input type="hidden" id="utenteId" />
-  
-  <div class="form-group">
-    <label for="utenteNome">Nome Utente *</label>
-    <input type="text" id="utenteNome" required minlength="3" placeholder="Es. MarioRossi" />
-  </div>
+        <form id="formUtente">
+          <input type="hidden" id="utenteId" />
 
-  <div class="form-group">
-    <label for="utentePassword">Password *</label>
-    <input 
-      type="password" 
-      id="utentePassword" 
-      pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$"
-      title="Deve contenere almeno 8 caratteri, una maiuscola, una minuscola e un numero"
-    />
-    <small id="passwordHelp" style="display: block; color: #666; margin-top: 5px; line-height: 1.2;">
-      Requisiti minimi: <strong>8 caratteri, 1 maiuscola, 1 minuscola e 1 numero.</strong><br>
-      <span id="editPasswordNote" style="font-style: italic;">Lascia vuoto per mantenere la password esistente.</span>
-    </small>
-  </div>
+          <div class="form-group">
+            <label for="utenteNome">Nome Utente *</label>
+            <input
+              type="text"
+              id="utenteNome"
+              required
+              minlength="3"
+              placeholder="Es. MarioRossi"
+            />
+          </div>
 
-  <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" onclick="closeUtenteModal()">Annulla</button>
-    <button type="submit" class="btn btn-primary">Salva Utente</button>
-  </div>
-</form>
+          <div class="form-group">
+            <label for="utentePassword">Password *</label>
+            <input
+              type="password"
+              id="utentePassword"
+              pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$"
+              title="Deve contenere almeno 8 caratteri, una maiuscola, una minuscola e un numero"
+            />
+            <small
+              id="passwordHelp"
+              style="
+                display: block;
+                color: #666;
+                margin-top: 5px;
+                line-height: 1.2;
+              "
+            >
+              Requisiti minimi:
+              <strong>8 caratteri, 1 maiuscola, 1 minuscola e 1 numero.</strong
+              ><br />
+              <span id="editPasswordNote" style="font-style: italic"
+                >Lascia vuoto per mantenere la password esistente.</span
+              >
+            </small>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeUtenteModal()"
+            >
+              Annulla
+            </button>
+            <button type="submit" class="btn btn-primary">Salva Utente</button>
+          </div>
+        </form>
       </div>
     </div>
 
