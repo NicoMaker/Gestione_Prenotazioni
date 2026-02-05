@@ -654,28 +654,33 @@
             </svg>
           </button>
         </div>
-        <form id="formUtente">
-          <input type="hidden" id="utenteId" />
-          <div class="form-group">
-            <label for="utenteNome">Nome *</label>
-            <input type="text" id="utenteNome" required />
-          </div>
-          <div class="form-group">
-            <label for="utentePassword">Password *</label>
-            <input type="password" id="utentePassword" />
-            <small>Lascia vuoto per mantenere la password esistente</small>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              onclick="closeUtenteModal()"
-            >
-              Annulla
-            </button>
-            <button type="submit" class="btn btn-primary">Salva</button>
-          </div>
-        </form>
+<form id="formUtente">
+  <input type="hidden" id="utenteId" />
+  
+  <div class="form-group">
+    <label for="utenteNome">Nome Utente *</label>
+    <input type="text" id="utenteNome" required minlength="3" placeholder="Es. MarioRossi" />
+  </div>
+
+  <div class="form-group">
+    <label for="utentePassword">Password *</label>
+    <input 
+      type="password" 
+      id="utentePassword" 
+      pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$"
+      title="Deve contenere almeno 8 caratteri, una maiuscola, una minuscola e un numero"
+    />
+    <small id="passwordHelp" style="display: block; color: #666; margin-top: 5px; line-height: 1.2;">
+      Requisiti minimi: <strong>8 caratteri, 1 maiuscola, 1 minuscola e 1 numero.</strong><br>
+      <span id="editPasswordNote" style="font-style: italic;">Lascia vuoto per mantenere la password esistente.</span>
+    </small>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" onclick="closeUtenteModal()">Annulla</button>
+    <button type="submit" class="btn btn-primary">Salva Utente</button>
+  </div>
+</form>
       </div>
     </div>
 
