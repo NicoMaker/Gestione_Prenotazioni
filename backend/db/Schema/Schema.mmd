@@ -1,0 +1,45 @@
+erDiagram
+    UTENTI {
+        int id PK
+        text nome UK
+        text password
+        datetime created_at
+    }
+    
+    MARCHE {
+        int id PK
+        text nome UK
+        datetime created_at
+    }
+    
+    CLIENTI {
+        int id PK
+        text nome UK
+        text num_tel
+        text email
+        datetime created_at
+    }
+    
+    MODELLI {
+        int id PK
+        text nome UK
+        int marche_id FK
+        datetime created_at
+    }
+    
+    ORDINI {
+        int id PK
+        datetime data_movimento
+        int modello_id FK 
+        int cliente_id FK 
+        int marca_id FK 
+        text note
+        datetime created_at
+    }
+    
+    %% Relazioni con cardinalità 1:N esplicita
+    MARCHE ||--o{ MODELLI : "1:N contiene"
+    MARCHE ||--o{ ORDINI : "1:N riferimento"
+    CLIENTI ||--o{ ORDINI : "1:N ha"
+    MODELLI ||--o{ ORDINI : "1:N specifica"
+    
