@@ -741,7 +741,7 @@ tbody tr:hover {
   width: 100%;
   max-width: 540px;
   max-height: 90vh;
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   flex-direction: column;
   animation: slideUpModal 0.4s cubic-bezier(0.16, 1, 0.3, 1);
