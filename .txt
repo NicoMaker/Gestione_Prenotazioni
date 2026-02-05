@@ -3,3 +3,5 @@ cambiare testi
 - al posti di ordini -> preventivi
 - e note preventivo
 - ricerca in nuvo preventivo per cliente e modello 
+
+nella parte clineti aggiungere data passaggio e flag ricontatto cliente (social)
