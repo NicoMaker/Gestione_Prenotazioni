@@ -13,3 +13,5 @@ alert moderne
 nella parte clienti aggiungere data passaggio e flag ricontatto cliente (social) con ckeckbox cliccato se si altrimenti no (bool in db -> true or false -> 0 0 1)
 
 ricerca in clienti anche per data passaggio 
+
+se modifico utente/elimino devi uscire in tutti gli utenti che è collegato 
