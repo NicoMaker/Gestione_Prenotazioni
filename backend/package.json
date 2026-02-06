@@ -13,7 +13,7 @@
     "api",
     "gestione-clienti"
   ],
-  "author": "",
+  "author": "Nico Maker",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",
