@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 const path = require("path");
 const fs = require("fs");
 
-const DB_PATH = path.join(__dirname, "../../data/database.db");
+const DB_PATH = path.join(__dirname, "Preventivi.db");
 const DB_DIR = path.dirname(DB_PATH);
 
 // Crea la cartella data se non esiste
