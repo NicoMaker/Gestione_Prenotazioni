@@ -203,7 +203,13 @@ function renderClienti() {
       </td>
       <td>${c.data_passaggio ? formatDate(c.data_passaggio) : "-"}</td>
       <td style="text-align:center;">
-        ${c.flag_ricontatto ? '<span class="badge-ricontatto" style="font-size:22px;" title="Ricontatto Social">📱</span>' : "-"}
+        <input 
+          type="checkbox" 
+          ${c.flag_ricontatto ? "checked" : ""} 
+          onchange="toggleRicontatto(${c.id}, this.checked)"
+          style="cursor: pointer; width: 18px; height: 18px;"
+          title="Ricontatto Cliente"
+        />
       </td>
       <td style="text-align: center">
         <span class="badge-count">${c.ordini_count || 0}</span>
@@ -300,6 +306,43 @@ function closeClienteModal() {
 function editCliente(id) {
   const cliente = clienti.find((c) => c.id === id);
   if (cliente) openClienteModal(cliente);
+}
+
+async function toggleRicontatto(clienteId, isChecked) {
+  try {
+    const res = await fetch(`${API_URL}/clienti/${clienteId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        flag_ricontatto: isChecked,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      // Aggiorna i dati locali senza ricaricare tutta la tabella
+      const cliente = allClienti.find((c) => c.id === clienteId);
+      if (cliente) {
+        cliente.flag_ricontatto = isChecked ? 1 : 0;
+      }
+      const clienteFiltered = clienti.find((c) => c.id === clienteId);
+      if (clienteFiltered) {
+        clienteFiltered.flag_ricontatto = isChecked ? 1 : 0;
+      }
+      showNotification(
+        isChecked ? "Ricontatto attivato" : "Ricontatto disattivato",
+        "success",
+      );
+    } else {
+      // Ripristina il checkbox in caso di errore
+      showNotification(data.error || "Errore durante l'aggiornamento", "error");
+      renderClienti();
+    }
+  } catch (error) {
+    showNotification("Errore di connessione", "error");
+    renderClienti();
+  }
 }
 
 async function deleteCliente(id) {

@@ -114,43 +114,63 @@ router.put("/:id", (req, res) => {
   const { id } = req.params;
   const { nome, num_tel, email, data_passaggio, flag_ricontatto } = req.body;
 
-  if (!nome || !nome.trim()) {
-    return res.status(400).json({ error: "Nome cliente obbligatorio" });
-  }
-
-  db.run(
-    "UPDATE clienti SET nome = ?, num_tel = ?, email = ?, data_passaggio = ?, flag_ricontatto = ? WHERE id = ?",
-    [
-      nome.trim(), 
-      num_tel || null, 
-      email || null, 
-      data_passaggio || null,
-      flag_ricontatto ? 1 : 0,
-      id
-    ],
-    function (err) {
-      if (err) {
-        if (err.message.includes("UNIQUE")) {
-          return res.status(400).json({ error: "Cliente già esistente" });
-        }
-        console.error("Errore aggiornamento cliente:", err);
-        return res.status(500).json({ error: err.message });
-      }
-
-      if (this.changes === 0) {
-        return res.status(404).json({ error: "Cliente non trovato" });
-      }
-
-      const io = req.app.get("io");
-      if (io) {
-        io.emit("cliente_modificato", { id });
-        io.emit("clienti_aggiornati");
-      }
-
-      console.log(`Cliente aggiornato: ID ${id} -> "${nome.trim()}"`);
-      res.json({ success: true, nome: nome.trim() });
+  // Recupera prima il cliente esistente
+  db.get("SELECT * FROM clienti WHERE id = ?", [id], (err, cliente) => {
+    if (err) {
+      console.error("Errore recupero cliente:", err);
+      return res.status(500).json({ error: err.message });
     }
-  );
+
+    if (!cliente) {
+      return res.status(404).json({ error: "Cliente non trovato" });
+    }
+
+    // Se viene passato il nome, deve essere valido
+    if (nome !== undefined && (!nome || !nome.trim())) {
+      return res.status(400).json({ error: "Nome cliente obbligatorio" });
+    }
+
+    // Usa i valori esistenti se non vengono passati nuovi valori
+    const updatedNome = nome !== undefined ? nome.trim() : cliente.nome;
+    const updatedNumTel = num_tel !== undefined ? (num_tel || null) : cliente.num_tel;
+    const updatedEmail = email !== undefined ? (email || null) : cliente.email;
+    const updatedDataPassaggio = data_passaggio !== undefined ? (data_passaggio || null) : cliente.data_passaggio;
+    const updatedFlagRicontatto = flag_ricontatto !== undefined ? (flag_ricontatto ? 1 : 0) : cliente.flag_ricontatto;
+
+    db.run(
+      "UPDATE clienti SET nome = ?, num_tel = ?, email = ?, data_passaggio = ?, flag_ricontatto = ? WHERE id = ?",
+      [
+        updatedNome, 
+        updatedNumTel, 
+        updatedEmail, 
+        updatedDataPassaggio,
+        updatedFlagRicontatto,
+        id
+      ],
+      function (err) {
+        if (err) {
+          if (err.message.includes("UNIQUE")) {
+            return res.status(400).json({ error: "Cliente già esistente" });
+          }
+          console.error("Errore aggiornamento cliente:", err);
+          return res.status(500).json({ error: err.message });
+        }
+
+        if (this.changes === 0) {
+          return res.status(404).json({ error: "Cliente non trovato" });
+        }
+
+        const io = req.app.get("io");
+        if (io) {
+          io.emit("cliente_modificato", { id });
+          io.emit("clienti_aggiornati");
+        }
+
+        console.log(`Cliente aggiornato: ID ${id} -> "${updatedNome}"`);
+        res.json({ success: true, nome: updatedNome });
+      }
+    );
+  });
 });
 
 // DELETE - Elimina cliente
