@@ -2435,3 +2435,75 @@ window.openModelloModal = async function (modello = null) {
 
 console.log("✅ SELECT Searchable migliorati attivati!");
 
+
+// Funzione per inizializzare la ricerca cliente ogni volta che apri il modal
+function setupClienteSelection() {
+    const searchInput = document.getElementById('ordineClienteSearch');
+    const hiddenInput = document.getElementById('ordineCliente');
+    const resultsDiv = document.getElementById('clienteResults');
+
+    searchInput.addEventListener('input', function() {
+        const val = this.value.toLowerCase().trim();
+        resultsDiv.innerHTML = '';
+        
+        if (val.length < 1) {
+            resultsDiv.style.display = 'none';
+            hiddenInput.value = ''; // Reset ID se cancello
+            return;
+        }
+
+        const matches = allClienti.filter(c => 
+            (`${c.nome} ${c.cognome}`).toLowerCase().includes(val) || 
+            (c.ragione_sociale || "").toLowerCase().includes(val)
+        );
+
+        matches.forEach(c => {
+            const div = document.createElement('div');
+            div.className = 'result-item';
+            div.textContent = c.ragione_sociale || `${c.nome} ${c.cognome}`;
+            div.onclick = () => {
+                searchInput.value = div.textContent;
+                hiddenInput.value = c.id; // ASSEGNAZIONE ID
+                resultsDiv.style.display = 'none';
+                searchInput.classList.add('has-selection');
+            };
+            resultsDiv.appendChild(div);
+        });
+        resultsDiv.style.display = matches.length ? 'block' : 'none';
+    });
+}
+
+// Gestione INVIO FORM
+document.getElementById('formOrdine').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const clienteId = document.getElementById('ordineCliente').value;
+    
+    // Controllo di sicurezza: se l'ID è vuoto, blocca tutto
+    if (!clienteId) {
+        alert("⚠️ Per favore, seleziona un cliente valido dalla lista suggerita.");
+        return;
+    }
+
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+        const response = await fetch(`${API_URL}/ordini`, {
+            method: data.id ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            alert("✅ Preventivo salvato con successo!");
+            closeOrdineModal();
+            loadOrdini(); // Ricarica la tabella
+        } else {
+            const res = await response.json();
+            alert("❌ Errore: " + res.error);
+        }
+    } catch (error) {
+        console.error("Errore invio:", error);
+    }
+});
