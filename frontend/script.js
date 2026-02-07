@@ -87,6 +87,12 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.removeItem("nomeUtente");
     localStorage.removeItem("utenteId");
     localStorage.removeItem("activeSection");
+    // Rimuovi anche i filtri salvati
+    localStorage.removeItem("clienti_filter_search");
+    localStorage.removeItem("clienti_filter_data");
+    localStorage.removeItem("ordini_filter_search");
+    localStorage.removeItem("marche_filter_search");
+    localStorage.removeItem("modelli_filter_search");
     window.location.href = "index.html";
   });
 
@@ -145,7 +151,11 @@ async function loadClienti() {
     const res = await fetch(`${API_URL}/clienti`);
     allClienti = await res.json();
     clienti = allClienti;
-    renderClienti();
+    
+    // Ripristina i filtri salvati
+    restoreClientiFilters();
+    
+    applyClientiFilters();
   } catch (error) {
     console.error("Errore caricamento clienti:", error);
     showNotification("Errore caricamento clienti", "error");
@@ -235,6 +245,7 @@ function renderClienti() {
 
 // Filtro testo clienti
 document.getElementById("filterClienti")?.addEventListener("input", (e) => {
+  saveClientiFilters();
   applyClientiFilters();
 });
 
@@ -242,8 +253,30 @@ document.getElementById("filterClienti")?.addEventListener("input", (e) => {
 document
   .getElementById("filterDataPassaggio")
   ?.addEventListener("change", (e) => {
+    saveClientiFilters();
     applyClientiFilters();
   });
+
+// Salva i filtri clienti in localStorage
+function saveClientiFilters() {
+  const searchTerm = document.getElementById("filterClienti")?.value || "";
+  const dataPassaggio = document.getElementById("filterDataPassaggio")?.value || "";
+  
+  localStorage.setItem("clienti_filter_search", searchTerm);
+  localStorage.setItem("clienti_filter_data", dataPassaggio);
+}
+
+// Ripristina i filtri clienti da localStorage
+function restoreClientiFilters() {
+  const savedSearch = localStorage.getItem("clienti_filter_search") || "";
+  const savedData = localStorage.getItem("clienti_filter_data") || "";
+  
+  const filterInput = document.getElementById("filterClienti");
+  const dataInput = document.getElementById("filterDataPassaggio");
+  
+  if (filterInput) filterInput.value = savedSearch;
+  if (dataInput) dataInput.value = savedData;
+}
 
 // Funzione per applicare tutti i filtri clienti
 function applyClientiFilters() {
@@ -419,7 +452,11 @@ async function loadOrdini() {
     const res = await fetch(`${API_URL}/ordini`);
     allOrdini = await res.json();
     ordini = allOrdini;
-    renderOrdini();
+    
+    // Ripristina i filtri salvati
+    restoreOrdiniFilters();
+    
+    applyOrdiniFilters();
   } catch (error) {
     console.error("Errore caricamento preventivi:", error);
     showNotification("Errore caricamento preventivi", "error");
@@ -464,7 +501,26 @@ function renderOrdini() {
 }
 
 document.getElementById("filterOrdini")?.addEventListener("input", (e) => {
-  const searchTerm = e.target.value.toLowerCase();
+  saveOrdiniFilters();
+  applyOrdiniFilters();
+});
+
+// Salva i filtri ordini in localStorage
+function saveOrdiniFilters() {
+  const searchTerm = document.getElementById("filterOrdini")?.value || "";
+  localStorage.setItem("ordini_filter_search", searchTerm);
+}
+
+// Ripristina i filtri ordini da localStorage
+function restoreOrdiniFilters() {
+  const savedSearch = localStorage.getItem("ordini_filter_search") || "";
+  const filterInput = document.getElementById("filterOrdini");
+  if (filterInput) filterInput.value = savedSearch;
+}
+
+// Applica i filtri ordini
+function applyOrdiniFilters() {
+  const searchTerm = document.getElementById("filterOrdini")?.value.toLowerCase() || "";
   ordini = allOrdini.filter(
     (o) =>
       o.cliente_nome.toLowerCase().includes(searchTerm) ||
@@ -472,7 +528,7 @@ document.getElementById("filterOrdini")?.addEventListener("input", (e) => {
       (o.modello_nome && o.modello_nome.toLowerCase().includes(searchTerm)),
   );
   renderOrdini();
-});
+}
 
 async function openOrdineModal(ordine = null) {
   await loadClientiForSelect();
@@ -725,10 +781,29 @@ function renderMarche() {
 }
 
 document.getElementById("filterMarche")?.addEventListener("input", (e) => {
-  const searchTerm = e.target.value.toLowerCase();
+  saveMarcheFilters();
+  applyMarcheFilters();
+});
+
+// Salva i filtri marche in localStorage
+function saveMarcheFilters() {
+  const searchTerm = document.getElementById("filterMarche")?.value || "";
+  localStorage.setItem("marche_filter_search", searchTerm);
+}
+
+// Ripristina i filtri marche da localStorage
+function restoreMarcheFilters() {
+  const savedSearch = localStorage.getItem("marche_filter_search") || "";
+  const filterInput = document.getElementById("filterMarche");
+  if (filterInput) filterInput.value = savedSearch;
+}
+
+// Applica i filtri marche
+function applyMarcheFilters() {
+  const searchTerm = document.getElementById("filterMarche")?.value.toLowerCase() || "";
   marche = allMarche.filter((m) => m.nome.toLowerCase().includes(searchTerm));
   renderMarche();
-});
+}
 
 function openMarcaModal(marca = null) {
   const modal = document.getElementById("modalMarca");
@@ -817,7 +892,11 @@ async function loadModelli() {
     const res = await fetch(`${API_URL}/modelli`);
     allModelli = await res.json();
     modelli = allModelli;
-    renderModelli();
+    
+    // Ripristina i filtri salvati
+    restoreModelliFilters();
+    
+    applyModelliFilters();
   } catch (error) {
     console.error("Errore caricamento modelli:", error);
   }
@@ -865,14 +944,33 @@ function renderModelli() {
 }
 
 document.getElementById("filterModelli")?.addEventListener("input", (e) => {
-  const searchTerm = e.target.value.toLowerCase();
+  saveModelliFilters();
+  applyModelliFilters();
+});
+
+// Salva i filtri modelli in localStorage
+function saveModelliFilters() {
+  const searchTerm = document.getElementById("filterModelli")?.value || "";
+  localStorage.setItem("modelli_filter_search", searchTerm);
+}
+
+// Ripristina i filtri modelli da localStorage
+function restoreModelliFilters() {
+  const savedSearch = localStorage.getItem("modelli_filter_search") || "";
+  const filterInput = document.getElementById("filterModelli");
+  if (filterInput) filterInput.value = savedSearch;
+}
+
+// Applica i filtri modelli
+function applyModelliFilters() {
+  const searchTerm = document.getElementById("filterModelli")?.value.toLowerCase() || "";
   modelli = allModelli.filter(
     (m) =>
       m.nome.toLowerCase().includes(searchTerm) ||
       (m.marca_nome && m.marca_nome.toLowerCase().includes(searchTerm)),
   );
   renderModelli();
-});
+}
 
 async function openModelloModal(modello = null) {
   const modal = document.getElementById("modalModello");
