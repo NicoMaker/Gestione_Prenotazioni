@@ -235,13 +235,13 @@ function renderClienti() {
         <span class="badge-count">${c.ordini_count || 0}</span>
       </td>
       <td class="text-right">
-        <button class="btn-icon" onclick="editCliente(${c.id})">
+        <button class="btn-icon" onclick="editCliente(${c.id})" title="Modifica cliente">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
           </svg>
         </button>
-        <button class="btn-icon" onclick="deleteCliente(${c.id})">
+        <button class="btn-icon" onclick="deleteCliente(${c.id})" title="Elimina cliente">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
           </svg>
@@ -625,13 +625,13 @@ function renderOrdini() {
       <td>${o.modello_nome || "-"}</td>
       <td>${o.note || "-"}</td>
       <td class="text-right">
-        <button class="btn-icon" onclick="editOrdine(${o.id})">
+        <button class="btn-icon" onclick="editOrdine(${o.id})" title="Modifica preventivo">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
           </svg>
         </button>
-        <button class="btn-icon" onclick="deleteOrdine(${o.id})">
+        <button class="btn-icon" onclick="deleteOrdine(${o.id})" title="Elimina preventivo">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
           </svg>
@@ -911,13 +911,13 @@ function renderMarche() {
         </span>
       </td>
       <td class="text-right">
-        <button class="btn-icon" onclick="editMarca(${m.id})">
+        <button class="btn-icon" onclick="editMarca(${m.id})" title="Modifica marca">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
           </svg>
         </button>
-        <button class="btn-icon" onclick="deleteMarca(${m.id})">
+        <button class="btn-icon" onclick="deleteMarca(${m.id})" title="Elimina marca">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
           </svg>
@@ -1076,13 +1076,13 @@ function renderModelli() {
         </span>
       </td>
       <td class="text-right">
-        <button class="btn-icon" onclick="editModello(${m.id})">
+        <button class="btn-icon" onclick="editModello(${m.id})" title="Modifica modello">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
           </svg>
         </button>
-        <button class="btn-icon" onclick="deleteModello(${m.id})">
+        <button class="btn-icon" onclick="deleteModello(${m.id})" title="Elimina modello">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
           </svg>
@@ -1248,13 +1248,13 @@ function renderUtenti() {
     <tr>
       <td><strong>${u.nome}</strong></td>
       <td class="text-right">
-        <button class="btn-icon" onclick="editUtente(${u.id})">
+        <button class="btn-icon" onclick="editUtente(${u.id})" title="Modifica utente">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
           </svg>
         </button>
-        <button class="btn-icon" onclick="deleteUtente(${u.id})">
+        <button class="btn-icon" onclick="deleteUtente(${u.id})" title="Elimina utente">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
           </svg>
@@ -1973,11 +1973,20 @@ async function initOrdineSearchableSelects() {
     async () => {
       const res = await fetch(`${API_URL}/clienti`);
       const clienti = await res.json();
-      return clienti.map((c) => ({
-        id: c.id,
-        nome: c.nome,
-        extra: c.email || c.num_tel || "",
-      }));
+      return clienti.map((c) => {
+        // Costruisci l'extra con telefono e email
+        const extraParts = [];
+        if (c.num_tel) extraParts.push(`📞 ${c.num_tel}`);
+        if (c.email) extraParts.push(`✉️ ${c.email}`);
+        
+        return {
+          id: c.id,
+          nome: c.nome,
+          extra: extraParts.join(' • '),
+          num_tel: c.num_tel || '',
+          email: c.email || ''
+        };
+      });
     },
     (id, nome) => {
       // Cliente selezionato
