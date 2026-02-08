@@ -203,7 +203,25 @@ function renderClienti() {
             : "-"
         }
       </td>
-      <td>${c.data_passaggio ? formatDate(c.data_passaggio) : "-"}</td>
+      <td style="position: relative;">
+        <div class="editable-date-cell" onclick="toggleDateEdit(${c.id}, '${c.data_passaggio || ''}', event)">
+          <span class="date-display">${c.data_passaggio ? formatDate(c.data_passaggio) : "-"}</span>
+          <svg class="edit-icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px; margin-left: 6px; opacity: 0.5;">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </div>
+        <input 
+          type="date" 
+          class="inline-date-input" 
+          id="dateInput_${c.id}"
+          value="${c.data_passaggio || ''}"
+          data-original-value="${c.data_passaggio || ''}"
+          onblur="saveAndHideDateInput(${c.id})"
+          onkeydown="handleDateKeydown(event, ${c.id})"
+          style="display: none; width: 100%; padding: 4px; border: 2px solid #6366f1; border-radius: 4px;"
+        />
+      </td>
       <td style="text-align:center;">
         <input 
           type="checkbox" 
@@ -372,6 +390,139 @@ async function toggleRicontatto(clienteId, isChecked) {
   }
 }
 
+
+// 📅 FUNZIONI PER EDITING INLINE DATA PASSAGGIO
+function toggleDateEdit(clienteId, currentDate, event) {
+  event.stopPropagation();
+  
+  // Nascondi tutti gli altri input date eventualmente aperti
+  document.querySelectorAll('.inline-date-input').forEach(input => {
+    input.style.display = 'none';
+    const parentCell = input.closest('td');
+    if (parentCell) {
+      const dateCell = parentCell.querySelector('.editable-date-cell');
+      if (dateCell) dateCell.style.display = 'flex';
+    }
+  });
+  
+  const dateInput = document.getElementById(`dateInput_${clienteId}`);
+  const dateCell = dateInput.previousElementSibling;
+  
+  if (dateInput && dateCell) {
+    dateCell.style.display = 'none';
+    dateInput.style.display = 'block';
+    
+    // Salva il valore originale per poterlo ripristinare con ESC
+    dateInput.setAttribute('data-original-value', dateInput.value);
+    
+    // Focus sull'input e apri il calendar picker
+    setTimeout(() => {
+      dateInput.focus();
+      try {
+        dateInput.showPicker(); // Apre il calendar picker automaticamente (se supportato)
+      } catch (e) {
+        // showPicker non supportato su alcuni browser, ignora
+      }
+    }, 50);
+  }
+}
+
+function handleDateKeydown(event, clienteId) {
+  // ESC - Annulla la modifica
+  if (event.key === 'Escape') {
+    const dateInput = document.getElementById(`dateInput_${clienteId}`);
+    if (dateInput) {
+      // Ripristina il valore originale
+      dateInput.value = dateInput.getAttribute('data-original-value') || '';
+      // Chiudi l'input senza salvare
+      cancelDateEdit(clienteId);
+    }
+  }
+  // ENTER - Salva la modifica
+  else if (event.key === 'Enter') {
+    event.preventDefault();
+    const dateInput = document.getElementById(`dateInput_${clienteId}`);
+    if (dateInput) {
+      dateInput.blur(); // Attiva il salvataggio tramite onblur
+    }
+  }
+}
+
+function cancelDateEdit(clienteId) {
+  const dateInput = document.getElementById(`dateInput_${clienteId}`);
+  const dateCell = dateInput?.previousElementSibling;
+  
+  if (dateInput && dateCell) {
+    dateInput.style.display = 'none';
+    dateCell.style.display = 'flex';
+  }
+}
+
+function saveAndHideDateInput(clienteId) {
+  const dateInput = document.getElementById(`dateInput_${clienteId}`);
+  const originalValue = dateInput?.getAttribute('data-original-value') || '';
+  const newValue = dateInput?.value || '';
+  
+  // Salva solo se il valore è cambiato
+  if (newValue !== originalValue) {
+    updateDataPassaggio(clienteId, newValue);
+  } else {
+    // Nascondi l'input senza salvare
+    cancelDateEdit(clienteId);
+  }
+}
+
+async function updateDataPassaggio(clienteId, newDate) {
+  try {
+    const res = await fetch(`${API_URL}/clienti/${clienteId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        data_passaggio: newDate || null,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      // Aggiorna i dati locali senza ricaricare tutta la tabella
+      const cliente = allClienti.find((c) => c.id === clienteId);
+      if (cliente) {
+        cliente.data_passaggio = newDate || null;
+      }
+      const clienteFiltered = clienti.find((c) => c.id === clienteId);
+      if (clienteFiltered) {
+        clienteFiltered.data_passaggio = newDate || null;
+      }
+      
+      // Aggiorna la visualizzazione della data
+      const dateInput = document.getElementById(`dateInput_${clienteId}`);
+      const dateCell = dateInput?.previousElementSibling;
+      if (dateCell) {
+        const dateDisplay = dateCell.querySelector('.date-display');
+        if (dateDisplay) {
+          dateDisplay.textContent = newDate ? formatDate(newDate) : '-';
+        }
+      }
+      
+      // Nascondi l'input
+      cancelDateEdit(clienteId);
+      
+      showNotification(
+        newDate ? "Data passaggio aggiornata" : "Data passaggio rimossa",
+        "success",
+      );
+    } else {
+      showNotification(data.error || "Errore durante l'aggiornamento", "error");
+      cancelDateEdit(clienteId);
+      renderClienti();
+    }
+  } catch (error) {
+    showNotification("Errore di connessione", "error");
+    cancelDateEdit(clienteId);
+    renderClienti();
+  }
+}
 async function deleteCliente(id) {
   const conferma = await showConfirmModal(
     "Sei sicuro di voler eliminare questo cliente?",
