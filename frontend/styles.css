@@ -4454,3 +4454,260 @@ tbody tr:hover {
 .inline-date-input::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
 }
+/* ========================================
+   STILI PER TABELLA PREVENTIVI MIGLIORATA
+   ======================================== */
+
+.contact-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.contact-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.contact-link.whatsapp {
+  background: #25D366;
+  color: white;
+}
+
+.contact-link.whatsapp:hover {
+  background: #128C7E;
+  transform: scale(1.1);
+}
+
+.contact-link.email {
+  background: #EA4335;
+  color: white;
+}
+
+.contact-link.email:hover {
+  background: #C5221F;
+  transform: scale(1.1);
+}
+
+.contact-link.phone {
+  background: #4285F4;
+  color: white;
+}
+
+.contact-link.phone:hover {
+  background: #1967D2;
+  transform: scale(1.1);
+}
+
+.tel-number,
+.email-text {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.inline-date-input {
+  padding: 6px 10px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  background: #f8fafc;
+  color: #1e293b;
+  min-width: 140px;
+}
+
+.inline-date-input:hover {
+  border-color: #cbd5e1;
+  background: white;
+}
+
+.inline-date-input:focus {
+  outline: none;
+  border-color: #6366f1;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.inline-checkbox {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  accent-color: #6366f1;
+  transition: transform 0.2s ease;
+}
+
+.inline-checkbox:hover {
+  transform: scale(1.15);
+}
+
+@media (max-width: 1400px) {
+  .contact-cell {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .tel-number,
+  .email-text {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .inline-date-input {
+    min-width: 120px;
+    font-size: 12px;
+  }
+  
+  .contact-link {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .inline-checkbox {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* ========================================
+   FIX ALLINEAMENTO TABELLA PREVENTIVI
+   ======================================== */
+
+.contact-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.contact-links {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.contact-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.contact-link.whatsapp {
+  background: #25D366;
+  color: white;
+}
+
+.contact-link.whatsapp:hover {
+  background: #128C7E;
+  transform: scale(1.1);
+}
+
+.contact-link.email {
+  background: #EA4335;
+  color: white;
+}
+
+.contact-link.email:hover {
+  background: #C5221F;
+  transform: scale(1.1);
+}
+
+.contact-link.phone {
+  background: #4285F4;
+  color: white;
+}
+
+.contact-link.phone:hover {
+  background: #1967D2;
+  transform: scale(1.1);
+}
+
+.tel-number,
+.email-text {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.inline-date-input {
+  padding: 6px 10px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  background: #f8fafc;
+  color: #1e293b;
+  min-width: 140px;
+  width: 100%;
+  max-width: 160px;
+}
+
+.inline-date-input:hover {
+  border-color: #cbd5e1;
+  background: white;
+}
+
+.inline-date-input:focus {
+  outline: none;
+  border-color: #6366f1;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.inline-checkbox {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  accent-color: #6366f1;
+  transition: transform 0.2s ease;
+}
+
+.inline-checkbox:hover {
+  transform: scale(1.15);
+}
+
+@media (max-width: 1400px) {
+  .contact-cell {
+    gap: 4px;
+  }
+  
+  .tel-number,
+  .email-text {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .inline-date-input {
+    min-width: 120px;
+    font-size: 12px;
+  }
+  
+  .contact-link {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .inline-checkbox {
+    width: 20px;
+    height: 20px;
+  }
+}

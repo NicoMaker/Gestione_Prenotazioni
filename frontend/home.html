@@ -275,7 +275,16 @@
                   type="text"
                   id="filterOrdini"
                   class="filter-input"
-                  placeholder="Cerca preventivo..."
+                  placeholder="Cerca cliente, tel, email..."
+                />
+              </div>
+              <div class="search-wrapper">
+                <input
+                  type="date"
+                  id="filterOrdiniDataPassaggio"
+                  class="filter-input"
+                  placeholder="Filtra per data passaggio"
+                  title="Filtra per data passaggio"
                 />
               </div>
               <button class="btn btn-secondary" onclick="printOrdiniDiretta()" title="Stampa preventivi raggruppati per cliente">
@@ -313,8 +322,12 @@
               <table>
                 <thead>
                   <tr>
-                    <th>Data</th>
+                    <th>Data Mov.</th>
                     <th>Cliente</th>
+                    <th>Telefono</th>
+                    <th>Email</th>
+                    <th>Data Pass.</th>
+                    <th class="text-center">Ricontatto</th>
                     <th>Marca</th>
                     <th>Modello</th>
                     <th>Note</th>
@@ -323,7 +336,7 @@
                 </thead>
                 <tbody id="ordiniTableBody">
                   <tr>
-                    <td colspan="6" class="text-center">
+                    <td colspan="10" class="text-center">
                       <span>Caricamento...</span>
                     </td>
                   </tr>
