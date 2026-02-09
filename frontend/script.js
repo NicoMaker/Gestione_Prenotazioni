@@ -1697,7 +1697,7 @@ function generateClienteSection(cliente, ordiniCliente) {
   <strong>✉️ Email:</strong> ${cliente.email || "-"}
   </p>
   <p style="margin:4px 0;font-size:12px;color:#555;">
-  <strong>📅 Data passaggio:</strong> ${cliente.data_passaggio ? formatDate(cliente.data_passaggio) : "-"}
+  <strong>📅 Data Passaggio/Ricontatto:</strong> ${cliente.data_passaggio ? formatDate(cliente.data_passaggio) : "-"}
   </p>
   <p style="margin:4px 0;font-size:12px;color:#555;">
   <strong>📞 Ricontatto:</strong> ${cliente.flag_ricontatto == 1 ? "Si" : "No"}
@@ -1709,7 +1709,7 @@ function generateClienteSection(cliente, ordiniCliente) {
       <table style="width:100%;border-collapse:collapse;font-size:11px;">
         <thead>
           <tr style="background:#ecf0f1;border-bottom:2px solid #34495e;">
-            <th style="padding:10px;text-align:left;border:1px solid #bdc3c7;">Data</th>
+            <th style="padding:10px;text-align:left;border:1px solid #bdc3c7;">Data Preventivo</th>
             <th style="padding:10px;text-align:left;border:1px solid #bdc3c7;">Marca</th>
             <th style="padding:10px;text-align:left;border:1px solid #bdc3c7;">Modello</th>
             <th style="padding:10px;text-align:left;border:1px solid #bdc3c7;">Note</th>
