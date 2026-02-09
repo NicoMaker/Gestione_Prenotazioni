@@ -5,19 +5,28 @@
 const sqlite3 = require("sqlite3").verbose();
 const bcrypt = require("bcrypt");
 const path = require("path");
+const fs = require("fs");
 
-const DB_PATH = path.join(__dirname, "../backend/db/Preventivi.db");
+const DB_PATH = path.join(__dirname, "Preventivi.db");
+const DB_DIR = path.dirname(DB_PATH);
 
 console.log("=".repeat(60));
 console.log("SEED DATABASE - Popolamento dati di esempio");
 console.log("=".repeat(60));
 
+// Crea la cartella db se non esiste
+if (!fs.existsSync(DB_DIR)) {
+  fs.mkdirSync(DB_DIR, { recursive: true });
+  console.log(`\n✓ Cartella database creata: ${DB_DIR}`);
+}
+
+// Connessione al database
 const db = new sqlite3.Database(DB_PATH, (err) => {
   if (err) {
     console.error("Errore connessione database:", err.message);
     process.exit(1);
   }
-  console.log("\n✓ Database connesso:", DB_PATH);
+  console.log(`\n✓ Database connesso: ${DB_PATH}`);
 });
 
 // Abilita le foreign keys
@@ -39,6 +48,77 @@ function getQuery(sql, params = []) {
     db.get(sql, params, (err, row) => {
       if (err) reject(err);
       else resolve(row);
+    });
+  });
+}
+
+// Funzione per inizializzare le tabelle
+async function initTables() {
+  console.log("\n[INIT] Creazione tabelle...");
+  
+  return new Promise((resolve, reject) => {
+    db.serialize(async () => {
+      try {
+        // Tabella utenti
+        await runQuery(`CREATE TABLE IF NOT EXISTS utenti (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          nome TEXT NOT NULL UNIQUE,
+          password TEXT NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+        console.log("  ✓ Tabella utenti OK");
+        
+        // Tabella marche
+        await runQuery(`CREATE TABLE IF NOT EXISTS marche (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          nome TEXT NOT NULL UNIQUE,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+        console.log("  ✓ Tabella marche OK");
+        
+        // Tabella clienti
+        await runQuery(`CREATE TABLE IF NOT EXISTS clienti (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          nome TEXT NOT NULL UNIQUE,
+          num_tel TEXT,
+          email TEXT,
+          data_passaggio DATE,
+          flag_ricontatto INTEGER DEFAULT 0,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+        console.log("  ✓ Tabella clienti OK");
+        
+        // Tabella modelli
+        await runQuery(`CREATE TABLE IF NOT EXISTS modelli (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          nome TEXT NOT NULL UNIQUE,
+          marche_id INTEGER,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (marche_id) REFERENCES marche(id)
+        )`);
+        console.log("  ✓ Tabella modelli OK");
+        
+        // Tabella ordini (preventivi)
+        await runQuery(`CREATE TABLE IF NOT EXISTS ordini (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          data_movimento DATETIME DEFAULT CURRENT_TIMESTAMP,
+          modello_id INTEGER,
+          cliente_id INTEGER NOT NULL,
+          marca_id INTEGER,
+          note TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (modello_id) REFERENCES modelli(id),
+          FOREIGN KEY (cliente_id) REFERENCES clienti(id),
+          FOREIGN KEY (marca_id) REFERENCES marche(id)
+        )`);
+        console.log("  ✓ Tabella ordini OK");
+        
+        console.log("✓ Tutte le tabelle sono pronte");
+        resolve();
+      } catch (err) {
+        console.error("✗ Errore creazione tabelle:", err.message);
+        reject(err);
+      }
     });
   });
 }
@@ -324,14 +404,14 @@ async function seedClienti() {
     {
       nome: "Anna Verdi",
       num_tel: "3391234567",
-      email: null,
+      email: "anna.verdi@gmail.com",
       data_passaggio: "2024-01-25",
       flag_ricontatto: 1,
     },
     {
       nome: "Marco Neri",
       num_tel: "3478901234",
-      email: null,
+      email: "marco.neri@hotmail.it",
       data_passaggio: null,
       flag_ricontatto: 0,
     },
@@ -339,14 +419,14 @@ async function seedClienti() {
     // Clienti solo con email
     {
       nome: "Silvia Conti",
-      num_tel: null,
+      num_tel: "3486111039",
       email: "silvia.conti@libero.it",
       data_passaggio: "2024-02-05",
       flag_ricontatto: 1,
     },
     {
       nome: "Paolo Ricci",
-      num_tel: null,
+      num_tel: "3340772694",
       email: "paolo.ricci@outlook.com",
       data_passaggio: null,
       flag_ricontatto: 0,
@@ -355,15 +435,15 @@ async function seedClienti() {
     // Clienti minimal (solo nome)
     {
       nome: "Francesca Moretti",
-      num_tel: null,
-      email: null,
+      num_tel: "3500228246",
+      email: "francesca.moretti@libero.it",
       data_passaggio: null,
       flag_ricontatto: 0,
     },
     {
       nome: "Roberto Colombo",
-      num_tel: null,
-      email: null,
+      num_tel: "3356998375",
+      email: "roberto.colombo@email.it",
       data_passaggio: "2024-03-01",
       flag_ricontatto: 1,
     },
@@ -395,13 +475,13 @@ async function seedClienti() {
     {
       nome: "Matteo Romano",
       num_tel: "3489012345",
-      email: null,
+      email: "matteo.romano@yahoo.it",
       data_passaggio: "2024-10-15",
       flag_ricontatto: 0,
     },
     {
       nome: "Giulia Marino",
-      num_tel: null,
+      num_tel: "3340823923",
       email: "giulia.marino@live.it",
       data_passaggio: "2024-09-05",
       flag_ricontatto: 1,
@@ -422,8 +502,8 @@ async function seedClienti() {
     },
     {
       nome: "Stefano Fontana",
-      num_tel: null,
-      email: null,
+      num_tel: "3345641621",
+      email: "stefano.fontana@outlook.com",
       data_passaggio: "2024-07-12",
       flag_ricontatto: 0,
     },
@@ -437,7 +517,7 @@ async function seedClienti() {
     {
       nome: "Alessandro Greco",
       num_tel: "3384567890",
-      email: null,
+      email: "alessandro.greco@gmail.com",
       data_passaggio: "2024-05-22",
       flag_ricontatto: 1,
     },
@@ -459,7 +539,7 @@ async function seedClienti() {
     },
     {
       nome: "Alessia Lombardi",
-      num_tel: null,
+      num_tel: "3502544514",
       email: "alessia.lombardi@email.it",
       data_passaggio: null,
       flag_ricontatto: 0,
@@ -467,14 +547,14 @@ async function seedClienti() {
     {
       nome: "Claudio Battaglia",
       num_tel: "3447890123",
-      email: null,
+      email: "claudio.battaglia@live.it",
       data_passaggio: null,
       flag_ricontatto: 0,
     },
     {
       nome: "Monica Martini",
-      num_tel: null,
-      email: null,
+      num_tel: "3356942968",
+      email: "monica.martini@libero.it",
       data_passaggio: null,
       flag_ricontatto: 1,
     },
@@ -793,11 +873,14 @@ async function seedDatabase() {
     console.log("INIZIO POPOLAMENTO DATABASE");
     console.log("=".repeat(60));
 
-    // Opzionale: Pulisci il database prima di iniziare
+    // STEP 1: Inizializza le tabelle (se non esistono)
+    await initTables();
+
+    // STEP 2: Opzionale - Pulisci il database prima di iniziare
     // Decommenta la riga seguente se vuoi partire da zero
     // await pulisciDatabase();
 
-    // Esegui il seed in ordine
+    // STEP 3: Esegui il seed in ordine
     const utentiIds = await seedUtenti();
     const marcheIds = await seedMarche();
     const modelliIds = await seedModelli(marcheIds);
@@ -817,6 +900,7 @@ async function seedDatabase() {
     console.log("=".repeat(60) + "\n");
   } catch (err) {
     console.error("\n✗ ERRORE DURANTE IL SEED:", err);
+    console.error(err);
   } finally {
     db.close((err) => {
       if (err) {
