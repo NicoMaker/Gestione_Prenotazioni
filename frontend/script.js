@@ -1694,7 +1694,7 @@ function generateClienteSection(cliente, ordiniCliente) {
   <strong>📱 Cellulare:</strong> ${cliente.num_tel || "-"}
   </p>
   <p style="margin:4px 0;font-size:12px;color:#555;">
-  <strong>✉️ Email:</strong> ${cliente.email || "-"}
+  <strong>✉️ Email:</strong> ${cliente.email || "NO"}
   </p>
   <p style="margin:4px 0;font-size:12px;color:#555;">
   <strong>📅 Data Passaggio/Ricontatto:</strong> ${cliente.data_passaggio ? formatDate(cliente.data_passaggio) : "-"}
