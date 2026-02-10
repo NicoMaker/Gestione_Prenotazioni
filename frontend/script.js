@@ -200,7 +200,7 @@ function renderClienti() {
             </svg>
             ${c.email}
           </a>`
-            : "-"
+            : "NO MAIL"
         }
       </td>
       <td style="position: relative;">
@@ -620,7 +620,7 @@ function renderOrdini() {
     .map(
       (o) => {
         const telefono = o.cliente_tel || "-";
-        const email = o.cliente_email || "-";
+        const email = o.cliente_email || "NO MAIL";
         const dataPassaggio = o.cliente_data_passaggio || "";
         const flagRicontatto = o.cliente_flag_ricontatto || 0;
         
@@ -632,14 +632,14 @@ function renderOrdini() {
             </a>`
           : "-";
         
-        const emailLink = email !== "-"
+        const emailLink = email !== "NO MAIL"
           ? `<a href="mailto:${email}" class="contact-link email" title="Invia Email">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                 <polyline points="22,6 12,13 2,6"/>
               </svg>
             </a>`
-          : "-";
+          : "NO MAIL";
         
         const telLink = telefono !== "-"
           ? `<a href="tel:${telefono}" class="contact-link phone" title="Chiama">
@@ -660,7 +660,7 @@ function renderOrdini() {
       </td>
       <td class="contact-cell">
         ${emailLink}
-        <span class="email-text">${email}</span>
+        ${email !== "NO MAIL" ? `<span class="email-text">${email}</span>` : ""}
       </td>
       <td>
         <input 
