@@ -4712,3 +4712,7 @@ tbody tr:hover {
     height: 20px;
   }
 }
+
+.btn-close{
+  display: none;
+}
