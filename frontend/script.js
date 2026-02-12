@@ -1871,9 +1871,8 @@ function createSearchableSelect(
           class="searchable-select-input" 
           placeholder="${placeholder}"
           autocomplete="off"
-          style="width:100%;padding:12px 80px 12px 18px;border:2px solid #e2e8f0;border-radius:12px;font-size:15px;transition:all 0.25s ease;background:white;"
+          style="width:100%;padding:12px 50px 12px 18px;border:2px solid #e2e8f0;border-radius:12px;font-size:15px;transition:all 0.25s ease;background:white;"
         />
-        <span class="search-icon" style="position:absolute;right:50px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:16px;color:#94a3b8;">🔍</span>
         <button 
           type="button"
           class="clear-selection-btn" 
@@ -1983,9 +1982,6 @@ function createSearchableSelect(
     selectedValueDisplay.textContent = nome;
     clearBtn.style.display = "block";
 
-    // Nascondi icona ricerca
-    container.querySelector(".search-icon").style.display = "none";
-
     // Callback
     if (onSelect) onSelect(id, nome);
   }
@@ -2001,7 +1997,6 @@ function createSearchableSelect(
     selectedValueDisplay.textContent = "";
     clearBtn.style.display = "none";
     results.style.display = "none";
-    container.querySelector(".search-icon").style.display = "block";
 
     // Reset validazione
     searchInput.setCustomValidity("");
