@@ -2,14 +2,16 @@ const express = require('express');
 const { db } = require('../db/init');
 const router = express.Router();
 
-// Get all marche with conteggio modelli (prodotti relazionati)
+// Get all marche with conteggio modelli (prodotti relazionati) e preventivi
 router.get('/', (req, res) => {
   const query = `
     SELECT 
       ma.*,
-      COUNT(DISTINCT mo.id) AS prodotti_count
+      COUNT(DISTINCT mo.id) AS prodotti_count,
+      COUNT(DISTINCT o.id) AS preventivi_count
     FROM marche ma
     LEFT JOIN modelli mo ON mo.marche_id = ma.id
+    LEFT JOIN ordini o ON o.marca_id = ma.id
     GROUP BY ma.id, ma.nome, ma.created_at
     ORDER BY ma.nome COLLATE NOCASE, ma.nome
   `;

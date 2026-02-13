@@ -55,7 +55,7 @@ function getQuery(sql, params = []) {
 // Funzione per inizializzare le tabelle
 async function initTables() {
   console.log("\n[INIT] Creazione tabelle...");
-  
+
   return new Promise((resolve, reject) => {
     db.serialize(async () => {
       try {
@@ -67,7 +67,7 @@ async function initTables() {
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
         console.log("  ✓ Tabella utenti OK");
-        
+
         // Tabella marche
         await runQuery(`CREATE TABLE IF NOT EXISTS marche (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -75,7 +75,7 @@ async function initTables() {
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
         console.log("  ✓ Tabella marche OK");
-        
+
         // Tabella clienti
         await runQuery(`CREATE TABLE IF NOT EXISTS clienti (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -87,7 +87,7 @@ async function initTables() {
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
         console.log("  ✓ Tabella clienti OK");
-        
+
         // Tabella modelli
         await runQuery(`CREATE TABLE IF NOT EXISTS modelli (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -97,7 +97,7 @@ async function initTables() {
           FOREIGN KEY (marche_id) REFERENCES marche(id)
         )`);
         console.log("  ✓ Tabella modelli OK");
-        
+
         // Tabella ordini (preventivi)
         await runQuery(`CREATE TABLE IF NOT EXISTS ordini (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -112,7 +112,7 @@ async function initTables() {
           FOREIGN KEY (marca_id) REFERENCES marche(id)
         )`);
         console.log("  ✓ Tabella ordini OK");
-        
+
         console.log("✓ Tutte le tabelle sono pronte");
         resolve();
       } catch (err) {
@@ -141,7 +141,7 @@ async function pulisciDatabase() {
 // ==================== SEED UTENTI ====================
 async function seedUtenti() {
   console.log("\n[UTENTI] Popolamento utenti...");
-  
+
   const utenti = [
     { nome: "Admin", password: "Admin123!" },
     { nome: "Mario_Rossi", password: "Password123!" },
@@ -177,7 +177,7 @@ async function seedUtenti() {
 // ==================== SEED MARCHE ====================
 async function seedMarche() {
   console.log("\n[MARCHE] Popolamento marche...");
-  
+
   const marche = [
     "Volkswagen",
     "BMW",
@@ -226,122 +226,122 @@ async function seedMarche() {
 // ==================== SEED MODELLI ====================
 async function seedModelli(marcheIds) {
   console.log("\n[MODELLI] Popolamento modelli...");
-  
+
   const modelli = [
     // Volkswagen
     { nome: "Golf VIII 1.5 TSI Life", marche_id: marcheIds["Volkswagen"] },
     { nome: "Polo 1.0 TSI Comfortline", marche_id: marcheIds["Volkswagen"] },
     { nome: "Tiguan 2.0 TDI 4Motion", marche_id: marcheIds["Volkswagen"] },
     { nome: "T-Roc 1.0 TSI Style", marche_id: marcheIds["Volkswagen"] },
-    
+
     // BMW
     { nome: "Serie 3 320d xDrive", marche_id: marcheIds["BMW"] },
     { nome: "Serie 1 118i M Sport", marche_id: marcheIds["BMW"] },
     { nome: "X3 xDrive20d", marche_id: marcheIds["BMW"] },
     { nome: "Serie 5 530e Plug-in Hybrid", marche_id: marcheIds["BMW"] },
-    
+
     // Mercedes-Benz
     { nome: "Classe A 180d Automatic", marche_id: marcheIds["Mercedes-Benz"] },
     { nome: "Classe C 220d 4Matic", marche_id: marcheIds["Mercedes-Benz"] },
     { nome: "GLA 200d Business", marche_id: marcheIds["Mercedes-Benz"] },
     { nome: "EQA 250 Electric", marche_id: marcheIds["Mercedes-Benz"] },
-    
+
     // Audi
     { nome: "A3 Sportback 35 TDI S tronic", marche_id: marcheIds["Audi"] },
     { nome: "A4 Avant 40 TDI quattro", marche_id: marcheIds["Audi"] },
     { nome: "Q3 35 TFSI S line", marche_id: marcheIds["Audi"] },
     { nome: "e-tron 55 quattro", marche_id: marcheIds["Audi"] },
-    
+
     // Toyota
     { nome: "Yaris Hybrid Active", marche_id: marcheIds["Toyota"] },
     { nome: "Corolla Hybrid Executive", marche_id: marcheIds["Toyota"] },
     { nome: "RAV4 Hybrid AWD", marche_id: marcheIds["Toyota"] },
     { nome: "C-HR 1.8 Hybrid", marche_id: marcheIds["Toyota"] },
-    
+
     // Ford
     { nome: "Fiesta 1.0 EcoBoost Titanium", marche_id: marcheIds["Ford"] },
     { nome: "Focus 1.5 EcoBlue ST-Line", marche_id: marcheIds["Ford"] },
     { nome: "Puma 1.0 EcoBoost Hybrid", marche_id: marcheIds["Ford"] },
     { nome: "Kuga 2.5 PHEV ST-Line", marche_id: marcheIds["Ford"] },
-    
+
     // Fiat
     { nome: "500 Hybrid Dolcevita", marche_id: marcheIds["Fiat"] },
     { nome: "Panda 1.0 Hybrid City Cross", marche_id: marcheIds["Fiat"] },
     { nome: "Tipo 1.6 Multijet Business", marche_id: marcheIds["Fiat"] },
     { nome: "500X 1.3 FireFly Cross", marche_id: marcheIds["Fiat"] },
-    
+
     // Peugeot
     { nome: "208 1.2 PureTech GT Line", marche_id: marcheIds["Peugeot"] },
     { nome: "2008 1.5 BlueHDi Allure", marche_id: marcheIds["Peugeot"] },
     { nome: "3008 1.5 BlueHDi GT", marche_id: marcheIds["Peugeot"] },
     { nome: "e-208 Electric", marche_id: marcheIds["Peugeot"] },
-    
+
     // Renault
     { nome: "Clio 1.0 TCe Intens", marche_id: marcheIds["Renault"] },
     { nome: "Captur 1.3 TCe Techno", marche_id: marcheIds["Renault"] },
     { nome: "Megane 1.5 dCi Zen", marche_id: marcheIds["Renault"] },
     { nome: "ZOE Electric R135", marche_id: marcheIds["Renault"] },
-    
+
     // Opel
     { nome: "Corsa 1.2 Elegance", marche_id: marcheIds["Opel"] },
     { nome: "Astra 1.5 Diesel Innovation", marche_id: marcheIds["Opel"] },
     { nome: "Crossland 1.2 Turbo GS Line", marche_id: marcheIds["Opel"] },
     { nome: "Mokka-e Electric Edition", marche_id: marcheIds["Opel"] },
-    
+
     // Alfa Romeo
     { nome: "Giulietta 1.6 JTDm Super", marche_id: marcheIds["Alfa Romeo"] },
     { nome: "Giulia 2.2 Turbodiesel", marche_id: marcheIds["Alfa Romeo"] },
     { nome: "Stelvio 2.2 Diesel Q4", marche_id: marcheIds["Alfa Romeo"] },
     { nome: "Tonale 1.5 Hybrid Speciale", marche_id: marcheIds["Alfa Romeo"] },
-    
+
     // Tesla
     { nome: "Model 3 Long Range", marche_id: marcheIds["Tesla"] },
     { nome: "Model Y Performance", marche_id: marcheIds["Tesla"] },
     { nome: "Model S Plaid", marche_id: marcheIds["Tesla"] },
     { nome: "Model X Long Range", marche_id: marcheIds["Tesla"] },
-    
+
     // Volvo
     { nome: "XC40 T3 R-Design", marche_id: marcheIds["Volvo"] },
     { nome: "XC60 D4 AWD Momentum", marche_id: marcheIds["Volvo"] },
     { nome: "V60 T6 Plug-in Hybrid", marche_id: marcheIds["Volvo"] },
     { nome: "C40 Recharge Pure Electric", marche_id: marcheIds["Volvo"] },
-    
+
     // Nissan
     { nome: "Micra 1.0 IG-T N-Sport", marche_id: marcheIds["Nissan"] },
     { nome: "Juke 1.0 DIG-T Tekna", marche_id: marcheIds["Nissan"] },
     { nome: "Qashqai 1.3 DIG-T N-Connecta", marche_id: marcheIds["Nissan"] },
     { nome: "Leaf Electric e+", marche_id: marcheIds["Nissan"] },
-    
+
     // Honda
     { nome: "Civic 1.0 VTEC Turbo Elegance", marche_id: marcheIds["Honda"] },
     { nome: "HR-V 1.5 i-VTEC Executive", marche_id: marcheIds["Honda"] },
     { nome: "CR-V 1.5 VTEC Turbo Elegance", marche_id: marcheIds["Honda"] },
     { nome: "e Electric Advance", marche_id: marcheIds["Honda"] },
-    
+
     // Mazda
     { nome: "Mazda2 1.5 Skyactiv-G Evolve", marche_id: marcheIds["Mazda"] },
     { nome: "Mazda3 2.0 Skyactiv-X Exceed", marche_id: marcheIds["Mazda"] },
     { nome: "CX-30 2.0 Skyactiv-G Exceed", marche_id: marcheIds["Mazda"] },
     { nome: "MX-30 Electric First Edition", marche_id: marcheIds["Mazda"] },
-    
+
     // Hyundai
     { nome: "i20 1.0 T-GDI 48V XTech", marche_id: marcheIds["Hyundai"] },
     { nome: "i30 1.6 CRDi Business", marche_id: marcheIds["Hyundai"] },
     { nome: "Tucson 1.6 CRDi 48V XTech", marche_id: marcheIds["Hyundai"] },
     { nome: "Kona Electric 64 kWh Exellence", marche_id: marcheIds["Hyundai"] },
-    
+
     // Kia
     { nome: "Picanto 1.0 GT Line", marche_id: marcheIds["Kia"] },
     { nome: "Stonic 1.0 T-GDI Urban", marche_id: marcheIds["Kia"] },
     { nome: "Sportage 1.6 CRDi Business", marche_id: marcheIds["Kia"] },
     { nome: "e-Niro Electric 64 kWh", marche_id: marcheIds["Kia"] },
-    
+
     // Skoda
     { nome: "Fabia 1.0 TSI Ambition", marche_id: marcheIds["Skoda"] },
     { nome: "Octavia 2.0 TDI Style", marche_id: marcheIds["Skoda"] },
     { nome: "Karoq 1.5 TSI Style", marche_id: marcheIds["Skoda"] },
     { nome: "Enyaq iV 80", marche_id: marcheIds["Skoda"] },
-    
+
     // Seat
     { nome: "Ibiza 1.0 TSI FR", marche_id: marcheIds["Seat"] },
     { nome: "Leon 1.5 TSI FR", marche_id: marcheIds["Seat"] },
@@ -375,7 +375,7 @@ async function seedModelli(marcheIds) {
 // ==================== SEED CLIENTI ====================
 async function seedClienti() {
   console.log("\n[CLIENTI] Popolamento clienti...");
-  
+
   const clienti = [
     // Clienti completi (con tutti i dati)
     {
@@ -399,7 +399,7 @@ async function seedClienti() {
       data_passaggio: "2024-03-10",
       flag_ricontatto: 0,
     },
-    
+
     // Clienti SENZA email (solo telefono)
     {
       nome: "Anna Verdi",
@@ -415,7 +415,7 @@ async function seedClienti() {
       data_passaggio: null,
       flag_ricontatto: 0,
     },
-    
+
     // Clienti con email
     {
       nome: "Silvia Conti",
@@ -431,7 +431,7 @@ async function seedClienti() {
       data_passaggio: null,
       flag_ricontatto: 0,
     },
-    
+
     // Clienti SENZA email
     {
       nome: "Francesca Moretti",
@@ -447,7 +447,7 @@ async function seedClienti() {
       data_passaggio: "2024-03-01",
       flag_ricontatto: 1,
     },
-    
+
     // Clienti recenti (da ricontattare)
     {
       nome: "Elena Gallo",
@@ -463,7 +463,7 @@ async function seedClienti() {
       data_passaggio: "2024-12-28",
       flag_ricontatto: 1,
     },
-    
+
     // Altri clienti vari
     {
       nome: "Chiara Esposito",
@@ -528,7 +528,7 @@ async function seedClienti() {
       data_passaggio: "2024-04-30",
       flag_ricontatto: 0,
     },
-    
+
     // Clienti senza data passaggio
     {
       nome: "Simone Caruso",
@@ -601,10 +601,10 @@ async function seedClienti() {
 // ==================== SEED ORDINI/PREVENTIVI ====================
 async function seedOrdini(clientiIds, modelliIds, marcheIds) {
   console.log("\n[ORDINI] Popolamento preventivi...");
-  
+
   // Genera ordini casuali per coprire tutti i casi
   const ordini = [];
-  
+
   // Caso 1: Preventivi completi con modello e marca
   ordini.push({
     cliente_id: clientiIds[0]?.id,
@@ -613,7 +613,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: "Cliente interessato a finanziamento. Valutazione permuta auto usata.",
     data_movimento: "2024-01-16",
   });
-  
+
   ordini.push({
     cliente_id: clientiIds[1]?.id,
     modello_id: modelliIds[8]?.id,
@@ -621,7 +621,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: "Preventivo con optional: tetto apribile, sedili riscaldati, telecamera posteriore.",
     data_movimento: "2024-02-21",
   });
-  
+
   ordini.push({
     cliente_id: clientiIds[2]?.id,
     modello_id: modelliIds[16]?.id,
@@ -629,7 +629,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: "Cliente cerca auto ibrida per risparmio carburante. Budget max 30.000 EUR.",
     data_movimento: "2024-03-11",
   });
-  
+
   // Caso 2: Preventivi solo con marca (senza modello specifico)
   ordini.push({
     cliente_id: clientiIds[3]?.id,
@@ -638,7 +638,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: "Cliente indeciso tra Serie 1 e Serie 3. Richiesto confronto prezzi.",
     data_movimento: "2024-01-26",
   });
-  
+
   ordini.push({
     cliente_id: clientiIds[4]?.id,
     modello_id: null,
@@ -646,7 +646,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: "Interessato a gamma SUV Audi. Test drive da programmare.",
     data_movimento: "2024-02-10",
   });
-  
+
   // Caso 3: Preventivi generici (senza modello né marca)
   ordini.push({
     cliente_id: clientiIds[5]?.id,
@@ -655,7 +655,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: "Cliente cerca auto compatta benzina. Budget 15.000 EUR. Prima auto.",
     data_movimento: "2024-02-06",
   });
-  
+
   ordini.push({
     cliente_id: clientiIds[6]?.id,
     modello_id: null,
@@ -663,7 +663,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: "Richiesta preventivo generico per auto elettrica aziendale.",
     data_movimento: "2024-03-05",
   });
-  
+
   // Caso 4: Preventivi con note dettagliate
   ordini.push({
     cliente_id: clientiIds[7]?.id,
@@ -672,7 +672,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: "Cliente ha chiesto: \n- Colore rosso\n- Cerchi in lega 16\"\n- Sensori parcheggio\n- Navigatore integrato\n- Garanzia estesa 3 anni",
     data_movimento: "2024-03-02",
   });
-  
+
   ordini.push({
     cliente_id: clientiIds[8]?.id,
     modello_id: modelliIds[32]?.id,
@@ -680,7 +680,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: "URGENTE: Cliente necessita auto entro fine mese per lavoro. Disponibile subito?",
     data_movimento: "2024-12-15",
   });
-  
+
   // Caso 5: Più preventivi per stesso cliente
   ordini.push({
     cliente_id: clientiIds[9]?.id,
@@ -689,7 +689,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: "Prima proposta: BMW Serie 3 - Prezzo listino 48.000 EUR",
     data_movimento: "2024-12-20",
   });
-  
+
   ordini.push({
     cliente_id: clientiIds[9]?.id,
     modello_id: modelliIds[12]?.id,
@@ -697,7 +697,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: "Seconda proposta: Audi A4 - Cliente preferisce questo modello",
     data_movimento: "2024-12-21",
   });
-  
+
   ordini.push({
     cliente_id: clientiIds[9]?.id,
     modello_id: modelliIds[9]?.id,
@@ -705,7 +705,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: "Terza proposta: Mercedes Classe C - Accettata! In attesa conferma finanziamento",
     data_movimento: "2024-12-22",
   });
-  
+
   // Caso 6: Preventivi recenti
   ordini.push({
     cliente_id: clientiIds[10]?.id,
@@ -714,7 +714,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: "Cliente vuole passare all'elettrico. Interessato a wallbox domestica.",
     data_movimento: "2024-12-28",
   });
-  
+
   // Caso 7: Preventivi con varie marche
   ordini.push({
     cliente_id: clientiIds[11]?.id,
@@ -723,7 +723,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: "Cliente cerca SUV compatto. Budget flessibile.",
     data_movimento: "2024-11-12",
   });
-  
+
   ordini.push({
     cliente_id: clientiIds[12]?.id,
     modello_id: modelliIds[20]?.id,
@@ -731,7 +731,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: "Permuta Ford Focus 2018 - Valutazione 12.000 EUR",
     data_movimento: "2024-10-16",
   });
-  
+
   ordini.push({
     cliente_id: clientiIds[13]?.id,
     modello_id: modelliIds[36]?.id,
@@ -739,7 +739,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: "Auto per neopatentato. Assicurazione inclusa nel preventivo.",
     data_movimento: "2024-09-06",
   });
-  
+
   ordini.push({
     cliente_id: clientiIds[14]?.id,
     modello_id: modelliIds[48]?.id,
@@ -747,7 +747,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: "Cliente aziendale - Richiesto preventivo flotta 5 auto",
     data_movimento: "2024-08-25",
   });
-  
+
   // Caso 8: Preventivi senza note
   ordini.push({
     cliente_id: clientiIds[15]?.id,
@@ -756,7 +756,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: null,
     data_movimento: "2024-08-21",
   });
-  
+
   ordini.push({
     cliente_id: clientiIds[16]?.id,
     modello_id: modelliIds[60]?.id,
@@ -764,7 +764,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: null,
     data_movimento: "2024-07-13",
   });
-  
+
   // Caso 9: Preventivi con date diverse
   ordini.push({
     cliente_id: clientiIds[17]?.id,
@@ -773,7 +773,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: "Preventivo valido fino al 30/06/2024",
     data_movimento: "2024-06-19",
   });
-  
+
   ordini.push({
     cliente_id: clientiIds[18]?.id,
     modello_id: modelliIds[72]?.id,
@@ -781,7 +781,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: "Sconto promozionale -15% applicato",
     data_movimento: "2024-05-23",
   });
-  
+
   ordini.push({
     cliente_id: clientiIds[19]?.id,
     modello_id: modelliIds[44]?.id,
@@ -789,7 +789,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: "Cliente richiede preventivo aggiornato con nuovi incentivi statali",
     data_movimento: "2024-05-01",
   });
-  
+
   // Caso 10: Preventivi storici
   ordini.push({
     cliente_id: clientiIds[20]?.id,
@@ -798,7 +798,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: "Ordine confermato e consegnato. Cliente soddisfatto.",
     data_movimento: "2024-01-10",
   });
-  
+
   ordini.push({
     cliente_id: clientiIds[21]?.id,
     modello_id: modelliIds[24]?.id,
@@ -806,7 +806,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: "Preventivo annullato - Cliente ha acquistato altrove",
     data_movimento: "2024-02-14",
   });
-  
+
   ordini.push({
     cliente_id: clientiIds[22]?.id,
     modello_id: null,
@@ -814,7 +814,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: "Richiesta informazioni generiche su gamma ibrida",
     data_movimento: "2024-03-20",
   });
-  
+
   // Caso 11: Preventivi con modelli elettrici
   ordini.push({
     cliente_id: clientiIds[23]?.id,
@@ -823,7 +823,7 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
     note: "Auto elettrica con autonomia 400km. Incentivi disponibili: 6.000 EUR",
     data_movimento: "2024-11-05",
   });
-  
+
   ordini.push({
     cliente_id: clientiIds[24]?.id,
     modello_id: modelliIds[33]?.id,
@@ -850,10 +850,10 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
         ]
       );
       ordiniIds.push(id);
-      
+
       const clienteNome = clientiIds.find(c => c.id === ordine.cliente_id)?.nome || "N/A";
       const modelloNome = modelliIds.find(m => m.id === ordine.modello_id)?.nome || "N/A";
-      
+
       console.log(
         `  ✓ Preventivo ID ${id} | Cliente: ${clienteNome} | Modello: ${modelloNome}`
       );

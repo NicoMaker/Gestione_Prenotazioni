@@ -1102,7 +1102,7 @@ function renderMarche() {
 
   if (marche.length === 0) {
     tbody.innerHTML =
-      '<tr><td colspan="3" class="text-center">Nessuna marca presente</td></tr>';
+      '<tr><td colspan="4" class="text-center">Nessuna marca presente</td></tr>';
     return;
   }
 
@@ -1116,6 +1116,13 @@ function renderMarche() {
           m.prodotti_count > 0 ? "has-products" : "empty"
         }">
           ${m.prodotti_count || 0}
+        </span>
+      </td>
+      <td class="text-center-badge">
+        <span class="prodotti-badge ${
+          m.preventivi_count > 0 ? "has-products" : "empty"
+        }">
+          ${m.preventivi_count || 0}
         </span>
       </td>
       <td class="text-right">
