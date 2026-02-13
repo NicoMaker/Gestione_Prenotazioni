@@ -1,6 +1,7 @@
 // scripts/seed-database.js
 // Script per popolare il database con dati di esempio completi
 // Eseguire con: node scripts/seed-database.js
+// ⚠️ IMPORTANTE: Ogni modello DEVE avere una marca associata (marche_id obbligatorio)
 
 const sqlite3 = require("sqlite3").verbose();
 const bcrypt = require("bcrypt");
@@ -88,15 +89,15 @@ async function initTables() {
         )`);
         console.log("  ✓ Tabella clienti OK");
 
-        // Tabella modelli
+        // Tabella modelli - ⚠️ marche_id è obbligatorio (NOT NULL)
         await runQuery(`CREATE TABLE IF NOT EXISTS modelli (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           nome TEXT NOT NULL UNIQUE,
-          marche_id INTEGER,
+          marche_id INTEGER NOT NULL,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (marche_id) REFERENCES marche(id)
         )`);
-        console.log("  ✓ Tabella modelli OK");
+        console.log("  ✓ Tabella modelli OK (marca obbligatoria)");
 
         // Tabella ordini (preventivi)
         await runQuery(`CREATE TABLE IF NOT EXISTS ordini (
@@ -226,6 +227,7 @@ async function seedMarche() {
 // ==================== SEED MODELLI ====================
 async function seedModelli(marcheIds) {
   console.log("\n[MODELLI] Popolamento modelli...");
+  console.log("⚠️  IMPORTANTE: Ogni modello DEVE avere una marca associata");
 
   const modelli = [
     // Volkswagen
@@ -350,25 +352,40 @@ async function seedModelli(marcheIds) {
   ];
 
   const modelliIds = [];
+  let errorCount = 0;
 
   for (const modello of modelli) {
+    // ⚠️ VALIDAZIONE: Verifica che marche_id sia presente
+    if (!modello.marche_id) {
+      console.error(`  ✗ ERRORE: Modello "${modello.nome}" non ha marca associata! SALTATO.`);
+      errorCount++;
+      continue;
+    }
+
     try {
       const id = await runQuery(
         "INSERT INTO modelli (nome, marche_id) VALUES (?, ?)",
         [modello.nome, modello.marche_id]
       );
       modelliIds.push({ id, ...modello });
-      console.log(`  ✓ Modello: ${modello.nome} (ID: ${id})`);
+      console.log(`  ✓ Modello: ${modello.nome} (ID: ${id}, Marca ID: ${modello.marche_id})`);
     } catch (err) {
       if (err.message.includes("UNIQUE")) {
         console.log(`  → Modello ${modello.nome} già esistente, skip`);
+      } else if (err.message.includes("NOT NULL")) {
+        console.error(`  ✗ ERRORE: Modello "${modello.nome}" manca marca_id (NOT NULL violation)`);
+        errorCount++;
       } else {
         console.error(`  ✗ Errore modello ${modello.nome}:`, err.message);
+        errorCount++;
       }
     }
   }
 
   console.log(`✓ ${modelliIds.length} modelli inseriti`);
+  if (errorCount > 0) {
+    console.warn(`⚠️  ${errorCount} modelli NON inseriti per mancanza marca`);
+  }
   return modelliIds;
 }
 
@@ -893,10 +910,11 @@ async function seedDatabase() {
     console.log("\nRIEPILOGO:");
     console.log(`  • Utenti:     ${utentiIds.length}`);
     console.log(`  • Marche:     ${Object.keys(marcheIds).length}`);
-    console.log(`  • Modelli:    ${modelliIds.length}`);
+    console.log(`  • Modelli:    ${modelliIds.length} (TUTTI con marca obbligatoria)`);
     console.log(`  • Clienti:    ${clientiIds.length}`);
     console.log(`  • Preventivi: ${ordiniIds.length}`);
     console.log("\n✓ Database pronto all'uso!");
+    console.log("⚠️  IMPORTANTE: Tutti i modelli hanno una marca associata (NOT NULL)");
     console.log("=".repeat(60) + "\n");
   } catch (err) {
     console.error("\n✗ ERRORE DURANTE IL SEED:", err);
