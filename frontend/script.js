@@ -11,6 +11,40 @@ let allOrdini = [];
 let allMarche = [];
 let allModelli = [];
 
+/**
+ * Formatta un numero di telefono per la visualizzazione
+ * Rimuove caratteri non numerici (eccetto +) e aggiunge spazi per leggibilità
+ */
+function formatPhoneNumber(phone) {
+  if (!phone || phone === "-") return phone;
+  
+  // Rimuovi tutti gli spazi esistenti
+  let cleaned = phone.replace(/\s+/g, '');
+  
+  // Se inizia con +39 (Italia)
+  if (cleaned.startsWith('+39')) {
+    // +39 XXX XXX XXXX
+    return cleaned.replace(/(\+39)(\d{3})(\d{3})(\d{4})/, '$1 $2 $3 $4');
+  }
+  // Se inizia con +
+  else if (cleaned.startsWith('+')) {
+    // Formato generico internazionale: +XX XXX XXX XXXX
+    return cleaned.replace(/(\+\d{1,3})(\d{3})(\d{3})(\d{4})/, '$1 $2 $3 $4');
+  }
+  // Se è un numero italiano senza prefisso (10 cifre)
+  else if (cleaned.length === 10) {
+    // XXX XXX XXXX
+    return cleaned.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3');
+  }
+  // Formato generico per altri numeri
+  else if (cleaned.length > 6) {
+    // Dividi in gruppi di 3 cifre
+    return cleaned.replace(/(\d{3})(?=\d)/g, '$1 ');
+  }
+  
+  return phone;
+}
+
 // INIZIALIZZAZIONE
 document.addEventListener("DOMContentLoaded", () => {
   const nomeUtente = localStorage.getItem("nomeUtente");
@@ -177,7 +211,7 @@ function renderClienti() {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" />
               </svg>
-              ${c.num_tel}
+              ${formatPhoneNumber(c.num_tel)}
             </a>
             <a href="https://wa.me/${c.num_tel.replace(/[^0-9]/g, "")}" class="btn-contact btn-whatsapp" target="_blank" title="WhatsApp">
               <svg viewBox="0 0 24 24" fill="currentColor">
@@ -661,7 +695,7 @@ function renderOrdini() {
       <td class="contact-cell">
         ${whatsappLink}
         ${telLink}
-        <span class="tel-number">${telefono}</span>
+        <span class="tel-number">${formatPhoneNumber(telefono)}</span>
       </td>
       <td class="contact-cell">
         ${emailLink}
@@ -1709,7 +1743,7 @@ function generatePrintHeader(company) {
       <p style="margin:3px 0;font-size:12px;color:#555;">${company.country || "Italia"}</p>
       <div style="margin-top:8px;padding-top:8px;border-top:1px solid #ddd;">
         <p style="margin:3px 0;font-size:11px;color:#666;"><strong>P.IVA:</strong> ${company.piva || ""}</p>
-        <p style="margin:3px 0;font-size:11px;color:#666;"><strong>Tel:</strong> ${company.phone || ""} | <strong>Email:</strong> ${company.email || ""}</p>
+        <p style="margin:3px 0;font-size:11px;color:#666;"><strong>Tel:</strong> ${formatPhoneNumber(company.phone) || ""} | <strong>Email:</strong> ${company.email || ""}</p>
       </div>
     </div>
   `;
