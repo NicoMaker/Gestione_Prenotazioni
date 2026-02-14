@@ -1756,7 +1756,7 @@ function generateClienteSection(cliente, ordiniCliente) {
   <div style="background:#f5f5f5;padding:15px;border-radius:6px;margin-bottom:15px;border-left:5px solid #2980b9;">
   <h2 style="margin:0 0 8px 0;font-size:17px;color:#2980b9;font-weight:bold;">${cliente.nome || "N/A"}</h2>
   <p style="margin:4px 0;font-size:12px;color:#555;">
-  <strong>📱 Cellulare:</strong> ${cliente.num_tel || "-"}
+  <strong>📱 Cellulare:</strong> ${formatPhoneNumber(cliente.num_tel) || "-"}
   </p>
   <p style="margin:4px 0;font-size:12px;color:#555;">
   <strong>✉️ Email:</strong> ${cliente.email || "NO"}
