@@ -1780,7 +1780,7 @@ function generateClienteSection(cliente, ordiniCliente) {
           <tr style="background:#ecf0f1;border-bottom:2px solid #34495e;">
             <th style="padding:10px;text-align:left;border:1px solid #bdc3c7;">Data Preventivo</th>
             <th style="padding:10px;text-align:left;border:1px solid #bdc3c7;">Marca</th>
-            <th style="padding:10px;text-align:left;border:1px solid #bdc3c7;">Modello</th>
+            <th style="padding:10px;text-align:left;border:1px solid #bdc3c7;">Marca / Modello</th>
             <th style="padding:10px;text-align:left;border:1px solid #bdc3c7;">Note</th>
           </tr>
         </thead>
