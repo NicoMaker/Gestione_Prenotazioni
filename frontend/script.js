@@ -2215,6 +2215,7 @@ function createSearchableSelect(
 // Variabili globali per i searchable selects
 let clienteSearchOrdine = null;
 let marcaSearchOrdine = null;
+let _settingMarcaFromModello = false; // flag anti-loop
 let modelloSearchOrdine = null;
 let marcaSearchModello = null;
 
@@ -2284,8 +2285,8 @@ async function initOrdineSearchableSelects() {
       return marche.map((m) => ({ id: m.id, nome: m.nome }));
     },
     async (id, nome) => {
-      // Quando seleziono una marca, filtro i modelli
-      if (modelloSearchOrdine) {
+      // Quando seleziono una marca, filtro i modelli (ma non resettare se impostata dal modello)
+      if (modelloSearchOrdine && !_settingMarcaFromModello) {
         await updateModelloByMarca(id);
       }
     },
@@ -2300,6 +2301,8 @@ async function initOrdineSearchableSelects() {
     async () => {
       const res = await fetch(`${API_URL}/modelli`);
       const modelli = await res.json();
+      // Aggiorna allModelli per coerenza col callback
+      allModelli = modelli;
       return modelli.map((m) => ({
         id: m.id,
         nome: m.nome,
@@ -2308,17 +2311,14 @@ async function initOrdineSearchableSelects() {
       }));
     },
     (id, nome) => {
-      // Quando seleziono un modello, aggiorno la marca se non già selezionata
+      // Quando seleziono un modello, imposta SEMPRE la marca corrispondente
       const modelloCompleto = allModelli.find(
         (m) => String(m.id) === String(id),
       );
-      if (
-        modelloCompleto &&
-        modelloCompleto.marche_id &&
-        marcaSearchOrdine &&
-        !marcaSearchOrdine.getValue()
-      ) {
+      if (modelloCompleto && modelloCompleto.marche_id && marcaSearchOrdine) {
+        _settingMarcaFromModello = true;
         marcaSearchOrdine.setValue(modelloCompleto.marche_id);
+        _settingMarcaFromModello = false;
       }
     },
     true, // required
