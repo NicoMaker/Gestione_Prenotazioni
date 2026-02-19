@@ -1956,6 +1956,7 @@ function createSearchableSelect(
             <div>
               <span style="font-size:11px;color:#065f46;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Selezionato</span>
               <div class="selected-value-display" style="font-size:15px;color:#065f46;font-weight:700;margin-top:2px;"></div>
+              <div class="selected-extra-display" style="font-size:12px;color:#047857;font-weight:600;margin-top:3px;"></div>
             </div>
             <span style="font-size:24px;">✓</span>
           </div>
@@ -2049,6 +2050,13 @@ function createSearchableSelect(
     searchInput.style.display = "none";
     selectionDisplay.style.display = "block";
     selectedValueDisplay.textContent = nome;
+    // Mostra extra (es. marca) se disponibile
+    const extraDisplay = container.querySelector(".selected-extra-display");
+    if (extraDisplay) {
+      const item = currentData.find((d) => String(d.id) === String(id));
+      extraDisplay.textContent = item && item.extra ? item.extra : "";
+      extraDisplay.style.display = item && item.extra ? "block" : "none";
+    }
     clearBtn.style.display = "block";
 
     // Callback
@@ -2064,6 +2072,8 @@ function createSearchableSelect(
     searchInput.style.display = "block";
     selectionDisplay.style.display = "none";
     selectedValueDisplay.textContent = "";
+    const extraDisplayReset = container.querySelector(".selected-extra-display");
+    if (extraDisplayReset) extraDisplayReset.textContent = "";
     clearBtn.style.display = "none";
     results.style.display = "none";
 
@@ -2100,6 +2110,10 @@ function createSearchableSelect(
 
         // Cerca nel numero di telefono se presente
         if (item.num_tel && item.num_tel.toLowerCase().includes(searchTerm))
+          return true;
+
+        // Cerca nell'extra (es. marca del modello)
+        if (item.extra && item.extra.toLowerCase().includes(searchTerm))
           return true;
 
         return false;
