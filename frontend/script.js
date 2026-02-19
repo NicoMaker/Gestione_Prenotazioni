@@ -1766,7 +1766,7 @@ function generateClienteSection(cliente, ordiniCliente) {
   <strong>✉️ Email:</strong> ${cliente.email || "No"}
   </p>
   <p style="margin:4px 0;font-size:12px;color:#555;">
-  <strong>📅 Data Passaggio/Ricontatto:</strong> ${cliente.data_passaggio ? formatDate(cliente.data_passaggio) : "NO"}
+  <strong>📅 Data Passaggio/Ricontatto:</strong> ${cliente.data_passaggio ? formatDate(cliente.data_passaggio) : "No"}
   </p>
   <p style="margin:4px 0;font-size:12px;color:#555;">
   <strong>📞 Ricontattato:</strong> ${cliente.flag_ricontatto == 1 ? "Si" : "No"}
