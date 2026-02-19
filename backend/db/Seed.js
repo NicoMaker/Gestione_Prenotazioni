@@ -392,9 +392,160 @@ async function seedModelli(marcheIds) {
 // ==================== SEED CLIENTI ====================
 async function seedClienti() {
   console.log("\n[CLIENTI] Popolamento clienti...");
+  console.log("  Casi coperti: [📱 solo cellulare] [📧 solo email] [📱📧 entrambi]");
 
   const clienti = [
-    // Clienti completi (con tutti i dati)
+    // ─────────────────────────────────────────────
+    // CASO 1: Solo CELLULARE (email = null)
+    // ─────────────────────────────────────────────
+    {
+      nome: "Marco Neri",
+      num_tel: "3478901234",
+      email: null,
+      data_passaggio: null,
+      flag_ricontatto: 0,
+    },
+    {
+      nome: "Anna Verdi",
+      num_tel: "3391234567",
+      email: null,
+      data_passaggio: "2024-01-25",
+      flag_ricontatto: 1,
+    },
+    {
+      nome: "Francesca Moretti",
+      num_tel: "3500228246",
+      email: null,
+      data_passaggio: null,
+      flag_ricontatto: 0,
+    },
+    {
+      nome: "Roberto Colombo",
+      num_tel: "3356998375",
+      email: null,
+      data_passaggio: "2024-03-01",
+      flag_ricontatto: 1,
+    },
+    {
+      nome: "Andrea Santoro",
+      num_tel: "3497654321",
+      email: null,
+      data_passaggio: "2024-12-28",
+      flag_ricontatto: 1,
+    },
+    {
+      nome: "Matteo Romano",
+      num_tel: "3489012345",
+      email: null,
+      data_passaggio: "2024-10-15",
+      flag_ricontatto: 0,
+    },
+    {
+      nome: "Davide Costa",
+      num_tel: "3338765432",
+      email: null,
+      data_passaggio: null,
+      flag_ricontatto: 0,
+    },
+    {
+      nome: "Stefano Fontana",
+      num_tel: "3345641621",
+      email: null,
+      data_passaggio: "2024-07-12",
+      flag_ricontatto: 0,
+    },
+    {
+      nome: "Alessandro Greco",
+      num_tel: "3384567890",
+      email: null,
+      data_passaggio: "2024-05-22",
+      flag_ricontatto: 1,
+    },
+    {
+      nome: "Simone Caruso",
+      num_tel: "3336789012",
+      email: null,
+      data_passaggio: null,
+      flag_ricontatto: 0,
+    },
+    {
+      nome: "Claudio Battaglia",
+      num_tel: "3447890123",
+      email: null,
+      data_passaggio: null,
+      flag_ricontatto: 0,
+    },
+    {
+      nome: "Monica Martini",
+      num_tel: "3356942968",
+      email: null,
+      data_passaggio: null,
+      flag_ricontatto: 1,
+    },
+
+    // ─────────────────────────────────────────────
+    // CASO 2: Solo EMAIL (num_tel = null)
+    // ─────────────────────────────────────────────
+    {
+      nome: "Cristina Fabbri",
+      num_tel: null,
+      email: "cristina.fabbri@gmail.com",
+      data_passaggio: "2024-02-10",
+      flag_ricontatto: 0,
+    },
+    {
+      nome: "Emanuele Mancini",
+      num_tel: null,
+      email: "emanuele.mancini@libero.it",
+      data_passaggio: null,
+      flag_ricontatto: 1,
+    },
+    {
+      nome: "Serena Pellegrini",
+      num_tel: null,
+      email: "serena.pellegrini@outlook.com",
+      data_passaggio: "2024-04-18",
+      flag_ricontatto: 0,
+    },
+    {
+      nome: "Daniele Ferretti",
+      num_tel: null,
+      email: "daniele.ferretti@yahoo.it",
+      data_passaggio: null,
+      flag_ricontatto: 0,
+    },
+    {
+      nome: "Irene Marchetti",
+      num_tel: null,
+      email: "irene.marchetti@hotmail.it",
+      data_passaggio: "2024-08-05",
+      flag_ricontatto: 1,
+    },
+    {
+      nome: "Tommaso Serra",
+      num_tel: null,
+      email: "tommaso.serra@email.it",
+      data_passaggio: null,
+      flag_ricontatto: 0,
+    },
+    {
+      nome: "Beatrice Longo",
+      num_tel: null,
+      email: "beatrice.longo@gmail.com",
+      data_passaggio: "2024-11-22",
+      flag_ricontatto: 1,
+    },
+    {
+      nome: "Nicola Ferrara",
+      num_tel: null,
+      email: "nicola.ferrara@live.it",
+      data_passaggio: null,
+      flag_ricontatto: 0,
+    },
+
+    // ─────────────────────────────────────────────
+    // CASO 3: ENTRAMBI cellulare + email
+    // ─────────────────────────────────────────────
     {
       nome: "Giovanni Bianchi",
       num_tel: "3331234567",
@@ -416,24 +567,6 @@ async function seedClienti() {
       data_passaggio: "2024-03-10",
       flag_ricontatto: 0,
     },
-
-    // Clienti SENZA email (solo telefono)
-    {
-      nome: "Anna Verdi",
-      num_tel: "3391234567",
-      email: null,
-      data_passaggio: "2024-01-25",
-      flag_ricontatto: 1,
-    },
-    {
-      nome: "Marco Neri",
-      num_tel: "3478901234",
-      email: null,
-      data_passaggio: null,
-      flag_ricontatto: 0,
-    },
-
-    // Clienti con email
     {
       nome: "Silvia Conti",
       num_tel: "3486111039",
@@ -448,24 +581,6 @@ async function seedClienti() {
       data_passaggio: null,
       flag_ricontatto: 0,
     },
-
-    // Clienti SENZA email
-    {
-      nome: "Francesca Moretti",
-      num_tel: "3500228246",
-      email: null,
-      data_passaggio: null,
-      flag_ricontatto: 0,
-    },
-    {
-      nome: "Roberto Colombo",
-      num_tel: "3356998375",
-      email: null,
-      data_passaggio: "2024-03-01",
-      flag_ricontatto: 1,
-    },
-
-    // Clienti recenti (da ricontattare)
     {
       nome: "Elena Gallo",
       num_tel: "3401234567",
@@ -474,26 +589,10 @@ async function seedClienti() {
       flag_ricontatto: 1,
     },
     {
-      nome: "Andrea Santoro",
-      num_tel: "3497654321",
-      email: null,
-      data_passaggio: "2024-12-28",
-      flag_ricontatto: 1,
-    },
-
-    // Altri clienti vari
-    {
       nome: "Chiara Esposito",
       num_tel: "3356781234",
       email: "chiara.espo@hotmail.it",
       data_passaggio: "2024-11-10",
-      flag_ricontatto: 0,
-    },
-    {
-      nome: "Matteo Romano",
-      num_tel: "3489012345",
-      email: null,
-      data_passaggio: "2024-10-15",
       flag_ricontatto: 0,
     },
     {
@@ -504,25 +603,11 @@ async function seedClienti() {
       flag_ricontatto: 1,
     },
     {
-      nome: "Davide Costa",
-      num_tel: "3338765432",
-      email: null,
-      data_passaggio: null,
-      flag_ricontatto: 0,
-    },
-    {
       nome: "Valentina Bruno",
       num_tel: "3452345678",
       email: "valentina.bruno@yahoo.it",
       data_passaggio: "2024-08-20",
       flag_ricontatto: 1,
-    },
-    {
-      nome: "Stefano Fontana",
-      num_tel: "3345641621",
-      email: null,
-      data_passaggio: "2024-07-12",
-      flag_ricontatto: 0,
     },
     {
       nome: "Laura De Luca",
@@ -532,26 +617,10 @@ async function seedClienti() {
       flag_ricontatto: 0,
     },
     {
-      nome: "Alessandro Greco",
-      num_tel: "3384567890",
-      email: null,
-      data_passaggio: "2024-05-22",
-      flag_ricontatto: 1,
-    },
-    {
       nome: "Federica Piras",
       num_tel: "3495678901",
       email: "federica.piras@libero.it",
       data_passaggio: "2024-04-30",
-      flag_ricontatto: 0,
-    },
-
-    // Clienti senza data passaggio
-    {
-      nome: "Simone Caruso",
-      num_tel: "3336789012",
-      email: null,
-      data_passaggio: null,
       flag_ricontatto: 0,
     },
     {
@@ -560,20 +629,6 @@ async function seedClienti() {
       email: "alessia.lombardi@email.it",
       data_passaggio: null,
       flag_ricontatto: 0,
-    },
-    {
-      nome: "Claudio Battaglia",
-      num_tel: "3447890123",
-      email: null,
-      data_passaggio: null,
-      flag_ricontatto: 0,
-    },
-    {
-      nome: "Monica Martini",
-      num_tel: "3356942968",
-      email: null,
-      data_passaggio: null,
-      flag_ricontatto: 1,
     },
     {
       nome: "Riccardo Vitale",
@@ -585,6 +640,7 @@ async function seedClienti() {
   ];
 
   const clientiIds = [];
+  let countSoloCel = 0, countSoloMail = 0, countEntrambi = 0;
 
   for (const cliente of clienti) {
     try {
@@ -599,8 +655,22 @@ async function seedClienti() {
         ]
       );
       clientiIds.push({ id, ...cliente });
+
+      // Determina il caso e aggiorna contatori
+      let caso;
+      if (cliente.num_tel && !cliente.email) {
+        caso = "📱 solo cel";
+        countSoloCel++;
+      } else if (!cliente.num_tel && cliente.email) {
+        caso = "📧 solo mail";
+        countSoloMail++;
+      } else {
+        caso = "📱📧 entrambi";
+        countEntrambi++;
+      }
+
       console.log(
-        `  ✓ Cliente: ${cliente.nome} | Tel: ${cliente.num_tel || "N/A"} | Email: ${cliente.email || "NO MAIL"} | Flag: ${cliente.flag_ricontatto} (ID: ${id})`
+        `  ✓ [${caso}] ${cliente.nome} | Tel: ${cliente.num_tel || "---"} | Email: ${cliente.email || "---"} (ID: ${id})`
       );
     } catch (err) {
       if (err.message.includes("UNIQUE")) {
@@ -611,7 +681,10 @@ async function seedClienti() {
     }
   }
 
-  console.log(`✓ ${clientiIds.length} clienti inseriti`);
+  console.log(`✓ ${clientiIds.length} clienti inseriti:`);
+  console.log(`  📱 Solo cellulare: ${countSoloCel}`);
+  console.log(`  📧 Solo email:     ${countSoloMail}`);
+  console.log(`  📱📧 Entrambi:     ${countEntrambi}`);
   return clientiIds;
 }
 
@@ -912,6 +985,9 @@ async function seedDatabase() {
     console.log(`  • Marche:     ${Object.keys(marcheIds).length}`);
     console.log(`  • Modelli:    ${modelliIds.length} (TUTTI con marca obbligatoria)`);
     console.log(`  • Clienti:    ${clientiIds.length}`);
+    console.log(`      📱 Solo cellulare: ${clientiIds.filter(c => c.num_tel && !c.email).length}`);
+    console.log(`      📧 Solo email:     ${clientiIds.filter(c => !c.num_tel && c.email).length}`);
+    console.log(`      📱📧 Entrambi:     ${clientiIds.filter(c => c.num_tel && c.email).length}`);
     console.log(`  • Preventivi: ${ordiniIds.length}`);
     console.log("\n✓ Database pronto all'uso!");
     console.log("⚠️  IMPORTANTE: Tutti i modelli hanno una marca associata (NOT NULL)");
