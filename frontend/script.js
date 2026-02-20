@@ -371,13 +371,12 @@ function openClienteModal(cliente = null) {
     document.getElementById("clienteEmail").value = cliente.email || "";
     document.getElementById("clienteDataPassaggio").value =
       cliente.data_passaggio || "";
-    document.getElementById("clienteFlagRicontatto").checked =
-      cliente.flag_ricontatto == 1;
+    setRicontattoModalState(cliente.flag_ricontatto == 1);
   } else {
     title.textContent = "Nuovo Cliente";
     document.getElementById("clienteId").value = "";
     document.getElementById("clienteDataPassaggio").value = "";
-    document.getElementById("clienteFlagRicontatto").checked = false;
+    setRicontattoModalState(false);
   }
 
   modal.classList.add("active");
@@ -385,6 +384,29 @@ function openClienteModal(cliente = null) {
 
 function closeClienteModal() {
   document.getElementById("modalCliente").classList.remove("active");
+}
+
+function setRicontattoModalState(isRicontattato) {
+  const hiddenInput = document.getElementById("clienteFlagRicontatto");
+  const btn = document.getElementById("btnToggleRicontattoModal");
+  if (!hiddenInput || !btn) return;
+  hiddenInput.value = isRicontattato ? "1" : "0";
+  if (isRicontattato) {
+    btn.textContent = "📱 Ricontattato";
+    btn.classList.remove("no");
+    btn.classList.add("si");
+  } else {
+    btn.textContent = "⏳ Da ricontattare";
+    btn.classList.remove("si");
+    btn.classList.add("no");
+  }
+}
+
+function toggleRicontattoModal() {
+  const hiddenInput = document.getElementById("clienteFlagRicontatto");
+  if (!hiddenInput) return;
+  const current = hiddenInput.value === "1";
+  setRicontattoModalState(!current);
 }
 
 function editCliente(id) {
@@ -594,7 +616,7 @@ document.getElementById("formCliente").addEventListener("submit", async (e) => {
   const data_passaggio = document.getElementById("clienteDataPassaggio").value;
   const flag_ricontatto = document.getElementById(
     "clienteFlagRicontatto",
-  ).checked;
+  ).value === "1";
 
   // Almeno uno tra cellulare e email obbligatorio
   if (!num_tel && !email) {
