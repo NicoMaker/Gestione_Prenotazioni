@@ -451,7 +451,7 @@ async function seedClienti() {
 // ==================== SEED ORDINI/PREVENTIVI ====================
 async function seedOrdini(clientiIds, modelliIds, marcheIds) {
   console.log("\n[ORDINI] Popolamento preventivi...");
-  console.log("  Casi coperti: [✅ Terminato] [🔴 non Terminato]");
+  console.log("  Casi coperti: [✅ concluso] [🔴 non concluso]");
 
   // contratto_finito: 1 = finito ✅, 0 = non finito 🔴
   const ordini = [
@@ -710,8 +710,8 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
   }
 
   console.log(`✓ ${ordiniIds.length} preventivi inseriti:`);
-  console.log(`  ✅ Contratto terminato:     ${countFiniti}`);
-  console.log(`  🔴 Contratto non terminato: ${countNonFiniti}`);
+  console.log(`  ✅ Contratto concluso:     ${countFiniti}`);
+  console.log(`  🔴 Contratto non concluso: ${countNonFiniti}`);
   return ordiniIds;
 }
 
@@ -727,11 +727,11 @@ async function seedDatabase() {
     // Decommenta per partire da zero:
     // await pulisciDatabase();
 
-    const utentiIds  = await seedUtenti();
-    const marcheIds  = await seedMarche();
+    const utentiIds = await seedUtenti();
+    const marcheIds = await seedMarche();
     const modelliIds = await seedModelli(marcheIds);
     const clientiIds = await seedClienti();
-    const ordiniIds  = await seedOrdini(clientiIds, modelliIds, marcheIds);
+    const ordiniIds = await seedOrdini(clientiIds, modelliIds, marcheIds);
 
     console.log("\n" + "=".repeat(60));
     console.log("SEED COMPLETATO CON SUCCESSO!");

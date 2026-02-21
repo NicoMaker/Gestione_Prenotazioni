@@ -203,9 +203,8 @@ function renderClienti() {
     <tr>
       <td><strong>${c.nome}</strong></td>
       <td>
-        ${
-          c.num_tel
-            ? `
+        ${c.num_tel
+          ? `
           <div class="contact-buttons">
             <a href="tel:${c.num_tel}" class="btn-contact btn-phone" title="Chiama">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -221,20 +220,19 @@ function renderClienti() {
             </a>
           </div>
         `
-            : "No Cell"
+          : "No Cell"
         }
       </td>
       <td>
-        ${
-          c.email
-            ? `<a href="mailto:${c.email}" class="btn-contact btn-email" title="Invia Email">
+        ${c.email
+          ? `<a href="mailto:${c.email}" class="btn-contact btn-email" title="Invia Email">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
               <polyline points="22,6 12,13 2,6" />
             </svg>
             ${c.email}
           </a>`
-            : "No Mail"
+          : "No Mail"
         }
       </td>
       <td style="position: relative;">
@@ -266,8 +264,7 @@ function renderClienti() {
         </button>
       </td>
       <td style="text-align: center">
-        <span class="prodotti-badge ${
-          c.ordini_count > 0 ? "has-products" : "empty"
+        <span class="prodotti-badge ${c.ordini_count > 0 ? "has-products" : "empty"
         }">
           ${c.ordini_count || 0}
         </span>
@@ -750,7 +747,7 @@ function renderOrdini() {
             onclick="updateContrattoFinito(${o.id}, ${!o.contratto_finito})"
             title="Clicca per cambiare stato contratto"
           >
-            ${o.contratto_finito ? '✅ Terminato' : '🔴 Non Terminato'}
+            ${o.contratto_finito ? '✅ concluso' : '🔴 Non concluso'}
           </button>
         </div>
       </td>
@@ -857,7 +854,7 @@ async function updateContrattoFinito(ordineId, newValue) {
     if (ordineFiltered) ordineFiltered.contratto_finito = newValue ? 1 : 0;
 
     showNotification(
-      newValue ? "✅ Contratto segnato come terminato!" : "🔴 Contratto segnato come non terminato",
+      newValue ? "✅ Contratto segnato come concluso!" : "🔴 Contratto segnato come non concluso",
       "success",
     );
     renderOrdini();
@@ -881,11 +878,11 @@ function toggleContrattoModal() {
   if (isNowFinito) {
     inner.classList.add("is-finito");
     icon.textContent = "✅";
-    label.textContent = "Terminato";
+    label.textContent = "concluso";
   } else {
     inner.classList.remove("is-finito");
     icon.textContent = "🔴";
-    label.textContent = "Non Terminato";
+    label.textContent = "Non concluso";
   }
 }
 
@@ -902,11 +899,11 @@ function setContrattoModalState(value) {
   if (value) {
     inner.classList.add("is-finito");
     icon.textContent = "✅";
-    label.textContent = "Terminato";
+    label.textContent = "concluso";
   } else {
     inner.classList.remove("is-finito");
     icon.textContent = "🔴";
-    label.textContent = "Non Terminato";
+    label.textContent = "Non concluso";
   }
 }
 
@@ -1122,8 +1119,8 @@ function populateOrdineModelliByMarca(marcaId) {
   const filtered =
     marcaId && marcaId !== ""
       ? source.filter(
-          (m) => m.marche_id && String(m.marche_id) === String(marcaId),
-        )
+        (m) => m.marche_id && String(m.marche_id) === String(marcaId),
+      )
       : source;
 
   select.innerHTML =
@@ -1131,8 +1128,7 @@ function populateOrdineModelliByMarca(marcaId) {
     filtered
       .map(
         (m) =>
-          `<option value="${m.id}">${m.nome}${
-            m.marca_nome ? ` (${m.marca_nome})` : ""
+          `<option value="${m.id}">${m.nome}${m.marca_nome ? ` (${m.marca_nome})` : ""
           }</option>`,
       )
       .join("");
@@ -1275,15 +1271,13 @@ function renderMarche() {
     <tr>
       <td><strong>${m.nome}</strong></td>
       <td class="text-center-badge">
-        <span class="prodotti-badge ${
-          m.prodotti_count > 0 ? "has-products" : "empty"
+        <span class="prodotti-badge ${m.prodotti_count > 0 ? "has-products" : "empty"
         }">
           ${m.prodotti_count || 0}
         </span>
       </td>
       <td class="text-center-badge">
-        <span class="prodotti-badge ${
-          m.preventivi_count > 0 ? "has-products" : "empty"
+        <span class="prodotti-badge ${m.preventivi_count > 0 ? "has-products" : "empty"
         }">
           ${m.preventivi_count || 0}
         </span>
@@ -1447,8 +1441,7 @@ function renderModelli() {
       <td><strong>${m.nome}</strong></td>
       <td>${m.marca_nome || "-"}</td>
       <td class="text-center-badge">
-        <span class="prodotti-badge ${
-          m.ordini_count > 0 ? "has-products" : "empty"
+        <span class="prodotti-badge ${m.ordini_count > 0 ? "has-products" : "empty"
         }">
           ${m.ordini_count || 0}
         </span>
@@ -1910,22 +1903,22 @@ function generateClienteSection(cliente, ordiniCliente) {
         </thead>
         <tbody>
           ${ordiniOrdinati
-            .map(
-              (o, i) => `
+      .map(
+        (o, i) => `
             <tr style="border-bottom:1px solid #ecf0f1;${i % 2 === 0 ? "background:#fafafa;" : ""}">
               <td style="padding:10px;border:1px solid #ecf0f1;font-weight:bold;white-space:nowrap;">${formatDate(o.data_movimento)}</td>
               <td style="padding:10px;border:1px solid #ecf0f1;">${o.marca_nome || "-"}</td>
               <td style="padding:10px;border:1px solid #ecf0f1;">${o.modello_nome || "-"}</td>
               <td style="padding:10px;border:1px solid #ecf0f1;text-align:center;">
                 <span style="display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;${o.contratto_finito ? 'background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;' : 'background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;'}">
-                  ${o.contratto_finito ? "✅ Terminato" : "🔴 Non Terminato"}
+                  ${o.contratto_finito ? "✅ concluso" : "🔴 Non concluso"}
                 </span>
               </td>
               <td style="padding:10px;border:1px solid #ecf0f1;">${o.note || "-"}</td>
             </tr>
           `,
-            )
-            .join("")}
+      )
+      .join("")}
         </tbody>
       </table>
     </div>
@@ -2260,19 +2253,19 @@ function createSearchableSelect(
       searchTerm === ""
         ? currentData
         : currentData.filter((item) => {
-            // Cerca nel nome
-            if (item.nome.toLowerCase().includes(searchTerm)) return true;
+          // Cerca nel nome
+          if (item.nome.toLowerCase().includes(searchTerm)) return true;
 
-            // Cerca nell'email se presente
-            if (item.email && item.email.toLowerCase().includes(searchTerm))
-              return true;
+          // Cerca nell'email se presente
+          if (item.email && item.email.toLowerCase().includes(searchTerm))
+            return true;
 
-            // Cerca nel numero di telefono se presente
-            if (item.num_tel && item.num_tel.toLowerCase().includes(searchTerm))
-              return true;
+          // Cerca nel numero di telefono se presente
+          if (item.num_tel && item.num_tel.toLowerCase().includes(searchTerm))
+            return true;
 
-            return false;
-          });
+          return false;
+        });
 
     showResults(filtered);
     searchInput.style.borderColor = "#6366f1";
