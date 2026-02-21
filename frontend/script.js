@@ -750,7 +750,7 @@ function renderOrdini() {
             onclick="updateContrattoFinito(${o.id}, ${!o.contratto_finito})"
             title="Clicca per cambiare stato contratto"
           >
-            ${o.contratto_finito ? '✅ finito' : '🔴 Non finito'}
+            ${o.contratto_finito ? '✅ Terminato' : '🔴 Non Terminato'}
           </button>
         </div>
       </td>
@@ -857,7 +857,7 @@ async function updateContrattoFinito(ordineId, newValue) {
     if (ordineFiltered) ordineFiltered.contratto_finito = newValue ? 1 : 0;
 
     showNotification(
-      newValue ? "✅ Contratto segnato come finito!" : "🔴 Contratto segnato come non finito",
+      newValue ? "✅ Contratto segnato come terminato!" : "🔴 Contratto segnato come non terminato",
       "success",
     );
     renderOrdini();
@@ -881,11 +881,11 @@ function toggleContrattoModal() {
   if (isNowFinito) {
     inner.classList.add("is-finito");
     icon.textContent = "✅";
-    label.textContent = "Contratto Finito";
+    label.textContent = "Terminato";
   } else {
     inner.classList.remove("is-finito");
     icon.textContent = "🔴";
-    label.textContent = "Contratto Non Finito";
+    label.textContent = "Non Terminato";
   }
 }
 
@@ -902,11 +902,11 @@ function setContrattoModalState(value) {
   if (value) {
     inner.classList.add("is-finito");
     icon.textContent = "✅";
-    label.textContent = "Contratto Finito";
+    label.textContent = "Terminato";
   } else {
     inner.classList.remove("is-finito");
     icon.textContent = "🔴";
-    label.textContent = "Contratto Non Finito";
+    label.textContent = "Non Terminato";
   }
 }
 
@@ -1918,7 +1918,7 @@ function generateClienteSection(cliente, ordiniCliente) {
               <td style="padding:10px;border:1px solid #ecf0f1;">${o.modello_nome || "-"}</td>
               <td style="padding:10px;border:1px solid #ecf0f1;text-align:center;">
                 <span style="display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;${o.contratto_finito ? 'background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;' : 'background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;'}">
-                  ${o.contratto_finito ? "✅ Finito" : "🔴 Non finito"}
+                  ${o.contratto_finito ? "✅ Terminato" : "🔴 Non Terminato"}
                 </span>
               </td>
               <td style="padding:10px;border:1px solid #ecf0f1;">${o.note || "-"}</td>

@@ -451,7 +451,7 @@ async function seedClienti() {
 // ==================== SEED ORDINI/PREVENTIVI ====================
 async function seedOrdini(clientiIds, modelliIds, marcheIds) {
   console.log("\n[ORDINI] Popolamento preventivi...");
-  console.log("  Casi coperti: [✅ contratto finito] [🔴 non finito]");
+  console.log("  Casi coperti: [✅ Terminato] [🔴 non Terminato]");
 
   // contratto_finito: 1 = finito ✅, 0 = non finito 🔴
   const ordini = [
@@ -710,8 +710,8 @@ async function seedOrdini(clientiIds, modelliIds, marcheIds) {
   }
 
   console.log(`✓ ${ordiniIds.length} preventivi inseriti:`);
-  console.log(`  ✅ Contratto finito:     ${countFiniti}`);
-  console.log(`  🔴 Contratto non finito: ${countNonFiniti}`);
+  console.log(`  ✅ Contratto terminato:     ${countFiniti}`);
+  console.log(`  🔴 Contratto non terminato: ${countNonFiniti}`);
   return ordiniIds;
 }
 
