@@ -2462,10 +2462,16 @@ async function initOrdineSearchableSelects() {
       const modelloCompleto = allModelli.find(
         (m) => String(m.id) === String(id),
       );
-      if (modelloCompleto && modelloCompleto.marche_id && marcaSearchOrdine) {
-        _settingMarcaFromModello = true;
-        marcaSearchOrdine.setValue(modelloCompleto.marche_id);
-        _settingMarcaFromModello = false;
+      if (modelloCompleto && modelloCompleto.marche_id) {
+        // Imposta direttamente l'hidden input — funziona anche senza marcaSearchOrdine
+        const marcaHidden = document.getElementById("ordineMarca");
+        if (marcaHidden) marcaHidden.value = modelloCompleto.marche_id;
+
+        if (marcaSearchOrdine) {
+          _settingMarcaFromModello = true;
+          marcaSearchOrdine.setValue(modelloCompleto.marche_id);
+          _settingMarcaFromModello = false;
+        }
       }
     },
     true, // required
@@ -2561,9 +2567,14 @@ window.openOrdineModal = async function (ordine = null) {
       await clienteSearchOrdine.loadData();
       clienteSearchOrdine.setValue(ordine.cliente_id);
     }
-    if (ordine.marca_id && marcaSearchOrdine) {
-      await marcaSearchOrdine.loadData();
-      marcaSearchOrdine.setValue(ordine.marca_id);
+    // Imposta marca nell'hidden input direttamente (non dipende da marcaSearchOrdine)
+    if (ordine.marca_id) {
+      const marcaHidden = document.getElementById("ordineMarca");
+      if (marcaHidden) marcaHidden.value = ordine.marca_id;
+      if (marcaSearchOrdine) {
+        await marcaSearchOrdine.loadData();
+        marcaSearchOrdine.setValue(ordine.marca_id);
+      }
     }
     if (ordine.modello_id && modelloSearchOrdine) {
       await modelloSearchOrdine.loadData();
