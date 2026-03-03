@@ -13,109 +13,36 @@ let allModelli = [];
 
 /**
  * Formatta un numero di telefono per la visualizzazione
+ * Rimuove caratteri non numerici (eccetto +) e aggiunge spazi per leggibilità
  */
 function formatPhoneNumber(phone) {
   if (!phone || phone === "-") return phone;
+
+  // Rimuovi tutti gli spazi esistenti
   let cleaned = phone.replace(/\s+/g, "");
+
+  // Se inizia con +39 (Italia)
   if (cleaned.startsWith("+39")) {
+    // +39 XXX XXX XXXX
     return cleaned.replace(/(\+39)(\d{3})(\d{3})(\d{4})/, "$1 $2 $3 $4");
-  } else if (cleaned.startsWith("+")) {
+  }
+  // Se inizia con +
+  else if (cleaned.startsWith("+")) {
+    // Formato generico internazionale: +XX XXX XXX XXXX
     return cleaned.replace(/(\+\d{1,3})(\d{3})(\d{3})(\d{4})/, "$1 $2 $3 $4");
-  } else if (cleaned.length === 10) {
+  }
+  // Se è un numero italiano senza prefisso (10 cifre)
+  else if (cleaned.length === 10) {
+    // XXX XXX XXXX
     return cleaned.replace(/(\d{3})(\d{3})(\d{4})/, "$1 $2 $3");
-  } else if (cleaned.length > 6) {
+  }
+  // Formato generico per altri numeri
+  else if (cleaned.length > 6) {
+    // Dividi in gruppi di 3 cifre
     return cleaned.replace(/(\d{3})(?=\d)/g, "$1 ");
   }
+
   return phone;
-}
-
-/**
- * Determina se un numero è un cellulare (idoneo per WhatsApp)
- * Logica: numeri italiani che iniziano con 3xx oppure +393xx
- * oppure numeri stranieri con prefisso mobile noto
- */
-function isMobileNumber(phone) {
-  if (!phone) return false;
-  const cleaned = phone.replace(/\s+/g, "");
-
-  // Numero italiano con prefisso +39 seguito da 3
-  if (/^\+393\d{8,9}$/.test(cleaned)) return true;
-
-  // Numero italiano senza prefisso che inizia con 3 (10 cifre)
-  if (/^3\d{9}$/.test(cleaned)) return true;
-
-  // Numero con prefisso internazionale generico +XX seguito da cifre (probabile mobile)
-  // Accettiamo qualunque numero internazionale non italiano come potenziale WA
-  if (
-    cleaned.startsWith("+") &&
-    !cleaned.startsWith("+390") &&
-    !cleaned.startsWith("+39 0")
-  ) {
-    // Se inizia con +39 deve avere il 3 dopo
-    if (cleaned.startsWith("+39")) {
-      return /^\+393/.test(cleaned);
-    }
-    return true; // numero estero → assume mobile
-  }
-
-  return false;
-}
-
-/**
- * Genera il blocco contatti: numero leggibile + icone allineate
- * Mostra WhatsApp solo se il numero è un cellulare
- */
-function buildContactCell(numTel) {
-  if (!numTel) return `<span class="no-contact">No Cell</span>`;
-
-  const telClean = numTel.replace(/[^0-9+]/g, "");
-  const waClean = numTel.replace(/[^0-9]/g, "");
-  const displayNum = formatPhoneNumber(numTel);
-  const showWA = isMobileNumber(numTel);
-
-  return `
-    <div class="contact-cell-v2">
-      <span class="contact-number">${displayNum}</span>
-      <div class="contact-icons">
-        <a href="tel:${telClean}" class="ci ci-phone" title="Chiama">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
-          </svg>
-        </a>
-        <a href="sms:${telClean}" class="ci ci-sms" title="SMS">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-          </svg>
-        </a>
-        ${
-          showWA
-            ? `
-        <a href="https://wa.me/${waClean}" class="ci ci-wa" target="_blank" title="WhatsApp">
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-          </svg>
-        </a>`
-            : ""
-        }
-      </div>
-    </div>`;
-}
-
-/**
- * Genera il blocco email
- */
-function buildEmailCell(email) {
-  if (!email) return `<span class="no-contact">No Mail</span>`;
-  return `
-    <div class="email-cell-v2">
-      <a href="mailto:${email}" class="email-link-v2" title="Invia Email">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-          <polyline points="22,6 12,13 2,6"/>
-        </svg>
-        ${email}
-      </a>
-    </div>`;
 }
 
 // INIZIALIZZAZIONE
@@ -139,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.addEventListener("click", (e) => {
-      if (window.innerWidth <= 1024) {
+      if (window.innerWidth <= 768) {
         if (
           !sidebar.contains(e.target) &&
           !mobileMenuToggle.contains(e.target)
@@ -169,11 +96,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       localStorage.setItem("activeSection", section);
 
-      if (window.innerWidth <= 1024) {
+      if (window.innerWidth <= 768) {
         sidebar.classList.remove("mobile-open");
         mobileMenuToggle.classList.remove("active");
       }
 
+      // Carica dati sezione
       if (section === "clienti") loadClienti();
       if (section === "ordini") loadOrdini();
       if (section === "marche") loadMarche();
@@ -219,7 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Toggle password utenti
+  // 🔥 TOGGLE PASSWORD UTENTI
   const togglePassword = document.getElementById("toggleUtentePassword");
   const passwordInput = document.getElementById("utentePassword");
 
@@ -251,6 +179,8 @@ async function loadClienti() {
     const res = await fetch(`${API_URL}/clienti`);
     allClienti = await res.json();
     clienti = allClienti;
+
+    // 🔥 Ripristina i filtri salvati
     restoreClientiFilters();
   } catch (error) {
     console.error("Errore caricamento clienti:", error);
@@ -272,8 +202,39 @@ function renderClienti() {
       (c) => `
     <tr>
       <td><strong>${c.nome}</strong></td>
-      <td>${buildContactCell(c.num_tel)}</td>
-      <td>${buildEmailCell(c.email)}</td>
+      <td>
+        ${c.num_tel
+          ? `
+          <div class="contact-buttons">
+            <a href="tel:${c.num_tel}" class="btn-contact btn-phone" title="Chiama">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" />
+              </svg>
+              ${formatPhoneNumber(c.num_tel)}
+            </a>
+            <a href="https://wa.me/${c.num_tel.replace(/[^0-9]/g, "")}" class="btn-contact btn-whatsapp" target="_blank" title="WhatsApp">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+              </svg>
+              WhatsApp
+            </a>
+          </div>
+        `
+          : "No Cell"
+        }
+      </td>
+      <td>
+        ${c.email
+          ? `<a href="mailto:${c.email}" class="btn-contact btn-email" title="Invia Email">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+              <polyline points="22,6 12,13 2,6" />
+            </svg>
+            ${c.email}
+          </a>`
+          : "No Mail"
+        }
+      </td>
       <td style="position: relative;">
         <div class="editable-date-cell" onclick="toggleDateEdit(${c.id}, '${c.data_passaggio || ""}', event)">
           <span class="date-display">${c.data_passaggio ? formatDate(c.data_passaggio) : "No"}</span>
@@ -282,9 +243,9 @@ function renderClienti() {
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
           </svg>
         </div>
-        <input
-          type="date"
-          class="inline-date-input"
+        <input 
+          type="date" 
+          class="inline-date-input" 
           id="dateInput_${c.id}"
           value="${c.data_passaggio || ""}"
           data-original-value="${c.data_passaggio || ""}"
@@ -295,15 +256,16 @@ function renderClienti() {
       </td>
       <td style="text-align:center;">
         <button
-          class="badge-ricontatto ${c.flag_ricontatto ? "si" : "no"}"
+          class="badge-ricontatto ${c.flag_ricontatto ? 'si' : 'no'}"
           onclick="toggleRicontatto(${c.id}, ${!c.flag_ricontatto})"
           title="Clicca per cambiare stato ricontatto"
         >
-          ${c.flag_ricontatto ? "📱 Ricontattato" : "⏳ Da ricontattare"}
+          ${c.flag_ricontatto ? '📱 Ricontattato' : '⏳ Da ricontattare'}
         </button>
       </td>
       <td style="text-align: center">
-        <span class="prodotti-badge ${c.ordini_count > 0 ? "has-products" : "empty"}">
+        <span class="prodotti-badge ${c.ordini_count > 0 ? "has-products" : "empty"
+        }">
           ${c.ordini_count || 0}
         </span>
       </td>
@@ -326,11 +288,12 @@ function renderClienti() {
     .join("");
 }
 
-// Salva e ripristina filtri clienti
+// 🔥 SALVA E RIPRISTINA FILTRI CLIENTI
 function saveClientiFilters() {
   const searchTerm = document.getElementById("filterClienti")?.value || "";
   const dataPassaggio =
     document.getElementById("filterDataPassaggio")?.value || "";
+
   localStorage.setItem("filter_clienti_search", searchTerm);
   localStorage.setItem("filter_clienti_data", dataPassaggio);
 }
@@ -338,25 +301,32 @@ function saveClientiFilters() {
 function restoreClientiFilters() {
   const savedSearch = localStorage.getItem("filter_clienti_search") || "";
   const savedData = localStorage.getItem("filter_clienti_data") || "";
+
   const searchInput = document.getElementById("filterClienti");
   const dataInput = document.getElementById("filterDataPassaggio");
+
   if (searchInput) searchInput.value = savedSearch;
   if (dataInput) dataInput.value = savedData;
+
+  // Applica sempre i filtri (anche se vuoti) per mostrare i dati
   applyClientiFilters();
 }
 
-document.getElementById("filterClienti")?.addEventListener("input", () => {
+// Filtro testo clienti
+document.getElementById("filterClienti")?.addEventListener("input", (e) => {
   saveClientiFilters();
   applyClientiFilters();
 });
 
+// 🆕 FILTRO DATA PASSAGGIO
 document
   .getElementById("filterDataPassaggio")
-  ?.addEventListener("change", () => {
+  ?.addEventListener("change", (e) => {
     saveClientiFilters();
     applyClientiFilters();
   });
 
+// Funzione per applicare tutti i filtri clienti
 function applyClientiFilters() {
   const searchTerm =
     document.getElementById("filterClienti")?.value.toLowerCase() || "";
@@ -364,15 +334,19 @@ function applyClientiFilters() {
     document.getElementById("filterDataPassaggio")?.value || "";
 
   clienti = allClienti.filter((c) => {
+    // Filtro testo
     const matchesText =
       !searchTerm ||
       c.nome.toLowerCase().includes(searchTerm) ||
       (c.num_tel && c.num_tel.toLowerCase().includes(searchTerm)) ||
       (c.email && c.email.toLowerCase().includes(searchTerm)) ||
       (c.data_passaggio && c.data_passaggio.includes(searchTerm));
+
+    // Filtro data passaggio
     const matchesData =
       !dataPassaggio ||
       (c.data_passaggio && c.data_passaggio.startsWith(dataPassaggio));
+
     return matchesText && matchesData;
   });
 
@@ -442,18 +416,25 @@ async function toggleRicontatto(clienteId, isChecked) {
     const res = await fetch(`${API_URL}/clienti/${clienteId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ flag_ricontatto: isChecked }),
+      body: JSON.stringify({
+        flag_ricontatto: isChecked,
+      }),
     });
+
     const data = await res.json();
+
     if (res.ok) {
-      const c = allClienti.find((x) => x.id === clienteId);
-      if (c) c.flag_ricontatto = isChecked ? 1 : 0;
-      const cf = clienti.find((x) => x.id === clienteId);
-      if (cf) cf.flag_ricontatto = isChecked ? 1 : 0;
+      // Aggiorna i dati locali senza ricaricare tutta la tabella
+      const cliente = allClienti.find((c) => c.id === clienteId);
+      if (cliente) {
+        cliente.flag_ricontatto = isChecked ? 1 : 0;
+      }
+      const clienteFiltered = clienti.find((c) => c.id === clienteId);
+      if (clienteFiltered) {
+        clienteFiltered.flag_ricontatto = isChecked ? 1 : 0;
+      }
       showNotification(
-        isChecked
-          ? "📱 Cliente segnato come ricontattato"
-          : "⏳ Flag ricontatto rimosso",
+        isChecked ? "📱 Cliente segnato come ricontattato" : "⏳ Flag ricontatto rimosso",
         "success",
       );
       renderClienti();
@@ -461,51 +442,73 @@ async function toggleRicontatto(clienteId, isChecked) {
       showNotification(data.error || "Errore durante l'aggiornamento", "error");
       renderClienti();
     }
-  } catch {
+  } catch (error) {
     showNotification("Errore di connessione", "error");
     renderClienti();
   }
 }
 
-// Editing inline data passaggio
+// 📅 FUNZIONI PER EDITING INLINE DATA PASSAGGIO
 function toggleDateEdit(clienteId, currentDate, event) {
   event.stopPropagation();
+
+  // Nascondi tutti gli altri input date eventualmente aperti
   document.querySelectorAll(".inline-date-input").forEach((input) => {
     input.style.display = "none";
-    const dateCell = input.closest("td")?.querySelector(".editable-date-cell");
-    if (dateCell) dateCell.style.display = "flex";
+    const parentCell = input.closest("td");
+    if (parentCell) {
+      const dateCell = parentCell.querySelector(".editable-date-cell");
+      if (dateCell) dateCell.style.display = "flex";
+    }
   });
+
   const dateInput = document.getElementById(`dateInput_${clienteId}`);
   const dateCell = dateInput.previousElementSibling;
+
   if (dateInput && dateCell) {
     dateCell.style.display = "none";
     dateInput.style.display = "block";
+
+    // Salva il valore originale per poterlo ripristinare con ESC
     dateInput.setAttribute("data-original-value", dateInput.value);
+
+    // Focus sull'input e apri il calendar picker
     setTimeout(() => {
       dateInput.focus();
       try {
-        dateInput.showPicker();
-      } catch (e) {}
+        dateInput.showPicker(); // Apre il calendar picker automaticamente (se supportato)
+      } catch (e) {
+        // showPicker non supportato su alcuni browser, ignora
+      }
     }, 50);
   }
 }
 
 function handleDateKeydown(event, clienteId) {
+  // ESC - Annulla la modifica
   if (event.key === "Escape") {
     const dateInput = document.getElementById(`dateInput_${clienteId}`);
     if (dateInput) {
+      // Ripristina il valore originale
       dateInput.value = dateInput.getAttribute("data-original-value") || "";
+      // Chiudi l'input senza salvare
       cancelDateEdit(clienteId);
     }
-  } else if (event.key === "Enter") {
+  }
+  // ENTER - Salva la modifica
+  else if (event.key === "Enter") {
     event.preventDefault();
-    document.getElementById(`dateInput_${clienteId}`)?.blur();
+    const dateInput = document.getElementById(`dateInput_${clienteId}`);
+    if (dateInput) {
+      dateInput.blur(); // Attiva il salvataggio tramite onblur
+    }
   }
 }
 
 function cancelDateEdit(clienteId) {
   const dateInput = document.getElementById(`dateInput_${clienteId}`);
   const dateCell = dateInput?.previousElementSibling;
+
   if (dateInput && dateCell) {
     dateInput.style.display = "none";
     dateCell.style.display = "flex";
@@ -516,9 +519,12 @@ function saveAndHideDateInput(clienteId) {
   const dateInput = document.getElementById(`dateInput_${clienteId}`);
   const originalValue = dateInput?.getAttribute("data-original-value") || "";
   const newValue = dateInput?.value || "";
+
+  // Salva solo se il valore è cambiato
   if (newValue !== originalValue) {
     updateDataPassaggio(clienteId, newValue);
   } else {
+    // Nascondi l'input senza salvare
     cancelDateEdit(clienteId);
   }
 }
@@ -528,21 +534,37 @@ async function updateDataPassaggio(clienteId, newDate) {
     const res = await fetch(`${API_URL}/clienti/${clienteId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ data_passaggio: newDate || null }),
+      body: JSON.stringify({
+        data_passaggio: newDate || null,
+      }),
     });
+
     const data = await res.json();
+
     if (res.ok) {
-      const c = allClienti.find((x) => x.id === clienteId);
-      if (c) c.data_passaggio = newDate || null;
-      const cf = clienti.find((x) => x.id === clienteId);
-      if (cf) cf.data_passaggio = newDate || null;
+      // Aggiorna i dati locali senza ricaricare tutta la tabella
+      const cliente = allClienti.find((c) => c.id === clienteId);
+      if (cliente) {
+        cliente.data_passaggio = newDate || null;
+      }
+      const clienteFiltered = clienti.find((c) => c.id === clienteId);
+      if (clienteFiltered) {
+        clienteFiltered.data_passaggio = newDate || null;
+      }
+
+      // Aggiorna la visualizzazione della data
       const dateInput = document.getElementById(`dateInput_${clienteId}`);
       const dateCell = dateInput?.previousElementSibling;
       if (dateCell) {
-        const dd = dateCell.querySelector(".date-display");
-        if (dd) dd.textContent = newDate ? formatDate(newDate) : "-";
+        const dateDisplay = dateCell.querySelector(".date-display");
+        if (dateDisplay) {
+          dateDisplay.textContent = newDate ? formatDate(newDate) : "-";
+        }
       }
+
+      // Nascondi l'input
       cancelDateEdit(clienteId);
+
       showNotification(
         newDate ? "Data passaggio aggiornata" : "Data passaggio rimossa",
         "success",
@@ -552,43 +574,48 @@ async function updateDataPassaggio(clienteId, newDate) {
       cancelDateEdit(clienteId);
       renderClienti();
     }
-  } catch {
+  } catch (error) {
     showNotification("Errore di connessione", "error");
     cancelDateEdit(clienteId);
     renderClienti();
   }
 }
-
 async function deleteCliente(id) {
   const conferma = await showConfirmModal(
     "Sei sicuro di voler eliminare questo cliente?",
     "Conferma Eliminazione",
   );
+
   if (!conferma) return;
+
   try {
     const res = await fetch(`${API_URL}/clienti/${id}`, { method: "DELETE" });
     const data = await res.json();
+
     if (res.ok) {
       showNotification("Cliente eliminato con successo!", "success");
       loadClienti();
     } else {
       showNotification(data.error || "Errore durante l'eliminazione", "error");
     }
-  } catch {
+  } catch (error) {
     showNotification("Errore di connessione", "error");
   }
 }
 
 document.getElementById("formCliente").addEventListener("submit", async (e) => {
   e.preventDefault();
+
   const id = document.getElementById("clienteId").value;
   const nome = document.getElementById("clienteNome").value.trim();
   const num_tel = document.getElementById("clienteTel").value.trim();
   const email = document.getElementById("clienteEmail").value.trim();
   const data_passaggio = document.getElementById("clienteDataPassaggio").value;
-  const flag_ricontatto =
-    document.getElementById("clienteFlagRicontatto").value === "1";
+  const flag_ricontatto = document.getElementById(
+    "clienteFlagRicontatto",
+  ).value === "1";
 
+  // Almeno uno tra cellulare e email obbligatorio
   if (!num_tel && !email) {
     showNotification("Inserire almeno un contatto: cellulare o email", "error");
     return;
@@ -609,7 +636,9 @@ document.getElementById("formCliente").addEventListener("submit", async (e) => {
         flag_ricontatto,
       }),
     });
+
     const data = await res.json();
+
     if (res.ok) {
       showNotification(
         id ? "Cliente aggiornato!" : "Cliente creato!",
@@ -620,17 +649,19 @@ document.getElementById("formCliente").addEventListener("submit", async (e) => {
     } else {
       showNotification(data.error || "Errore durante il salvataggio", "error");
     }
-  } catch {
+  } catch (error) {
     showNotification("Errore di connessione", "error");
   }
 });
 
-// ==================== PREVENTIVI ====================
+// ==================== PREVENTIVI (EX ORDINI) ====================
 async function loadOrdini() {
   try {
     const res = await fetch(`${API_URL}/ordini`);
     allOrdini = await res.json();
     ordini = allOrdini;
+
+    // 🔥 Ripristina il filtro salvato
     restoreOrdiniFilter();
   } catch (error) {
     console.error("Errore caricamento preventivi:", error);
@@ -649,26 +680,55 @@ function renderOrdini() {
 
   tbody.innerHTML = ordini
     .map((o) => {
-      const telefono = o.cliente_tel || "";
-      const email = o.cliente_email || "";
+      const telefono = o.cliente_tel || "No Cell";
+      const email = o.cliente_email || "No Mail";
       const dataPassaggio = o.cliente_data_passaggio || "";
       const flagRicontatto = o.cliente_flag_ricontatto || 0;
+
+      const whatsappLink =
+        telefono !== "No Cell"
+          ? `<a href="https://wa.me/${telefono.replace(/[^0-9]/g, "")}" target="_blank" class="contact-link whatsapp" title="Apri WhatsApp">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+              </svg>
+            </a>`
+          : "-";
+
+      const emailLink =
+        email !== "No Mail"
+          ? `<a href="mailto:${email}" class="contact-link email" title="Invia Email">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+            </a>`
+          : "No Mail";
+
+      const telLink =
+        telefono !== "No Cell"
+          ? `<a href="tel:${telefono}" class="contact-link phone" title="Chiama">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+              </svg>
+            </a>`
+          : "No Cell";
 
       return `
     <tr>
       <td>${formatDate(o.data_movimento)}</td>
       <td><strong>${o.cliente_nome}</strong></td>
-      <td>
-        <div class="ordine-contact-col">
-          ${buildContactCell(telefono)}
-          ${buildEmailCell(email)}
-        </div>
+      <td class="contact-cell">
+        ${telefono !== "No Cell" ? `${whatsappLink}${telLink}<span class="tel-number">${formatPhoneNumber(telefono)}</span>` : "No Cell"}
+      </td>
+      <td class="contact-cell">
+        ${emailLink}
+        ${email !== "No Mail" ? `<span class="email-text">${email}</span>` : ""}
       </td>
       <td>
-        <input
-          type="date"
-          class="inline-date-input"
-          value="${dataPassaggio}"
+        <input 
+          type="date" 
+          class="inline-date-input" 
+          value="${dataPassaggio}" 
           onchange="updateClienteDataPassaggio(${o.cliente_id}, this.value)"
           title="Modifica data passaggio"
         />
@@ -676,18 +736,18 @@ function renderOrdini() {
       <td class="text-center">
         <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
           <button
-            class="badge-ricontatto ${flagRicontatto ? "si" : "no"}"
+            class="badge-ricontatto ${flagRicontatto ? 'si' : 'no'}"
             onclick="updateClienteFlagRicontatto(${o.cliente_id}, ${!flagRicontatto})"
             title="Clicca per cambiare stato ricontatto"
           >
-            ${flagRicontatto ? "📱 Ricontattato" : "⏳ Da ricontattare"}
+            ${flagRicontatto ? '📱 Ricontattato' : '⏳ Da ricontattare'}
           </button>
           <button
-            class="badge-contratto ${o.contratto_finito ? "si" : "no"}"
+            class="badge-contratto ${o.contratto_finito ? 'si' : 'no'}"
             onclick="updateContrattoFinito(${o.id}, ${!o.contratto_finito})"
             title="Clicca per cambiare stato contratto"
           >
-            ${o.contratto_finito ? "✅ concluso" : "🔴 Non concluso"}
+            ${o.contratto_finito ? '✅ concluso' : '🔴 Non concluso'}
           </button>
         </div>
       </td>
@@ -707,7 +767,8 @@ function renderOrdini() {
           </svg>
         </button>
       </td>
-    </tr>`;
+    </tr>
+  `;
     })
     .join("");
 }
@@ -719,10 +780,15 @@ async function updateClienteDataPassaggio(clienteId, newDate) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ data_passaggio: newDate }),
     });
-    if (!response.ok) throw new Error();
+
+    if (!response.ok) {
+      throw new Error("Errore aggiornamento data passaggio");
+    }
+
     showNotification("Data passaggio aggiornata", "success");
     await loadOrdini();
-  } catch {
+  } catch (error) {
+    console.error("Errore:", error);
     showNotification("Errore aggiornamento data passaggio", "error");
     await loadOrdini();
   }
@@ -735,25 +801,26 @@ async function updateClienteFlagRicontatto(clienteId, checked) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ flag_ricontatto: checked }),
     });
-    if (!response.ok) throw new Error();
+
+    if (!response.ok) {
+      throw new Error("Errore aggiornamento flag ricontatto");
+    }
+
+    // Aggiorna dati locali — tutti i preventivi dello stesso cliente
     allOrdini
       .filter((x) => x.cliente_id === clienteId)
-      .forEach((x) => {
-        x.cliente_flag_ricontatto = checked ? 1 : 0;
-      });
+      .forEach((x) => { x.cliente_flag_ricontatto = checked ? 1 : 0; });
     ordini
       .filter((x) => x.cliente_id === clienteId)
-      .forEach((x) => {
-        x.cliente_flag_ricontatto = checked ? 1 : 0;
-      });
+      .forEach((x) => { x.cliente_flag_ricontatto = checked ? 1 : 0; });
+
     showNotification(
-      checked
-        ? "📱 Cliente segnato come ricontattato"
-        : "⏳ Flag ricontatto rimosso",
+      checked ? "📱 Cliente segnato come ricontattato" : "⏳ Flag ricontatto rimosso",
       "success",
     );
     renderOrdini();
-  } catch {
+  } catch (error) {
+    console.error("Errore:", error);
     showNotification("Errore aggiornamento flag ricontatto", "error");
     await loadOrdini();
   }
@@ -766,6 +833,7 @@ async function updateContrattoFinito(ordineId, newValue) {
       showNotification("Preventivo non trovato", "error");
       return;
     }
+
     const response = await fetch(`${API_URL}/ordini/${ordineId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -778,31 +846,37 @@ async function updateContrattoFinito(ordineId, newValue) {
         contratto_finito: newValue,
       }),
     });
-    if (!response.ok) throw new Error();
-    const oa = allOrdini.find((o) => o.id === ordineId);
-    if (oa) oa.contratto_finito = newValue ? 1 : 0;
-    const of2 = ordini.find((o) => o.id === ordineId);
-    if (of2) of2.contratto_finito = newValue ? 1 : 0;
+
+    if (!response.ok) throw new Error("Errore aggiornamento contratto finito");
+
+    // Aggiorna dati locali senza ricaricare
+    const ordineAll = allOrdini.find((o) => o.id === ordineId);
+    if (ordineAll) ordineAll.contratto_finito = newValue ? 1 : 0;
+    const ordineFiltered = ordini.find((o) => o.id === ordineId);
+    if (ordineFiltered) ordineFiltered.contratto_finito = newValue ? 1 : 0;
+
     showNotification(
-      newValue
-        ? "✅ Contratto segnato come concluso!"
-        : "🔴 Contratto segnato come non concluso",
+      newValue ? "✅ Contratto segnato come concluso!" : "🔴 Contratto segnato come non concluso",
       "success",
     );
     renderOrdini();
-  } catch {
+  } catch (error) {
+    console.error("Errore:", error);
     showNotification("Errore aggiornamento contratto finito", "error");
     await loadOrdini();
   }
 }
 
+// Toggle visivo nel modal preventivo
 function toggleContrattoModal() {
   const hidden = document.getElementById("ordineContrattoFinito");
   const inner = document.getElementById("contrattoToggleInner");
   const icon = document.getElementById("contrattoIcon");
   const label = document.getElementById("contrattoLabel");
+
   const isNowFinito = hidden.value !== "1";
   hidden.value = isNowFinito ? "1" : "0";
+
   if (isNowFinito) {
     inner.classList.add("is-finito");
     icon.textContent = "✅";
@@ -814,12 +888,15 @@ function toggleContrattoModal() {
   }
 }
 
+// Imposta stato visivo del toggle nel modal
 function setContrattoModalState(value) {
   const hidden = document.getElementById("ordineContrattoFinito");
   const inner = document.getElementById("contrattoToggleInner");
   const icon = document.getElementById("contrattoIcon");
   const label = document.getElementById("contrattoLabel");
+
   if (!hidden || !inner) return;
+
   hidden.value = value ? "1" : "0";
   if (value) {
     inner.classList.add("is-finito");
@@ -833,24 +910,32 @@ function setContrattoModalState(value) {
 }
 
 function saveOrdiniFilter() {
-  localStorage.setItem(
-    "filter_ordini_search",
-    document.getElementById("filterOrdini")?.value || "",
-  );
-  localStorage.setItem(
-    "filter_ordini_data_passaggio",
-    document.getElementById("filterOrdiniDataPassaggio")?.value || "",
-  );
+  const searchTerm = document.getElementById("filterOrdini")?.value || "";
+  const dataPassaggio =
+    document.getElementById("filterOrdiniDataPassaggio")?.value || "";
+  localStorage.setItem("filter_ordini_search", searchTerm);
+  localStorage.setItem("filter_ordini_data_passaggio", dataPassaggio);
 }
 
 function restoreOrdiniFilter() {
   const savedSearch = localStorage.getItem("filter_ordini_search") || "";
-  const savedData = localStorage.getItem("filter_ordini_data_passaggio") || "";
-  const si = document.getElementById("filterOrdini");
-  const di = document.getElementById("filterOrdiniDataPassaggio");
-  if (si) si.value = savedSearch;
-  if (di) di.value = savedData;
-  applyOrdiniFilter(savedSearch.toLowerCase(), savedData);
+  const savedDataPassaggio =
+    localStorage.getItem("filter_ordini_data_passaggio") || "";
+
+  const searchInput = document.getElementById("filterOrdini");
+  const dataPassaggioInput = document.getElementById(
+    "filterOrdiniDataPassaggio",
+  );
+
+  if (searchInput) {
+    searchInput.value = savedSearch;
+  }
+
+  if (dataPassaggioInput) {
+    dataPassaggioInput.value = savedDataPassaggio;
+  }
+
+  applyOrdiniFilter(savedSearch.toLowerCase(), savedDataPassaggio);
 }
 
 function applyOrdiniFilter(searchTerm = "", dataPassaggio = "") {
@@ -862,77 +947,121 @@ function applyOrdiniFilter(searchTerm = "", dataPassaggio = "") {
       (o.cliente_email && o.cliente_email.toLowerCase().includes(searchTerm)) ||
       (o.marca_nome && o.marca_nome.toLowerCase().includes(searchTerm)) ||
       (o.modello_nome && o.modello_nome.toLowerCase().includes(searchTerm));
+
     const matchData =
       !dataPassaggio ||
       (o.cliente_data_passaggio && o.cliente_data_passaggio === dataPassaggio);
+
     return matchText && matchData;
   });
+
   renderOrdini();
 }
 
 document.getElementById("filterOrdini")?.addEventListener("input", (e) => {
+  const searchTerm = e.target.value.toLowerCase();
+  const dataPassaggio =
+    document.getElementById("filterOrdiniDataPassaggio")?.value || "";
   saveOrdiniFilter();
-  applyOrdiniFilter(
-    e.target.value.toLowerCase(),
-    document.getElementById("filterOrdiniDataPassaggio")?.value || "",
-  );
+  applyOrdiniFilter(searchTerm, dataPassaggio);
 });
 
 document
   .getElementById("filterOrdiniDataPassaggio")
   ?.addEventListener("change", (e) => {
+    const searchTerm =
+      document.getElementById("filterOrdini")?.value.toLowerCase() || "";
+    const dataPassaggio = e.target.value;
     saveOrdiniFilter();
-    applyOrdiniFilter(
-      document.getElementById("filterOrdini")?.value.toLowerCase() || "",
-      e.target.value,
-    );
+    applyOrdiniFilter(searchTerm, dataPassaggio);
   });
 
 async function openOrdineModal(ordine = null) {
   await loadClientiForSelect();
+  await loadMarcheForSelect();
+  await loadModelliForSelect();
 
   const modal = document.getElementById("modalOrdine");
   const title = document.getElementById("modalOrdineTitle");
   const form = document.getElementById("formOrdine");
 
   form.reset();
+  // Reset stato toggle contratto
   setContrattoModalState(false);
-
-  if (!clienteSearchOrdine || !marcaModelloSearchOrdine) {
-    await initOrdineSearchableSelects();
-  } else {
-    clienteSearchOrdine.reset();
-    marcaModelloSearchOrdine.reset();
-    await clienteSearchOrdine.loadData();
-    await marcaModelloSearchOrdine.loadData();
-  }
 
   if (ordine) {
     title.textContent = "Modifica Preventivo";
     document.getElementById("ordineId").value = ordine.id;
+
+    document.getElementById("ordineCliente").value = ordine.cliente_id;
     document.getElementById("ordineData").value = formatDateForInput(
       ordine.data_movimento,
     );
+    document.getElementById("ordineMarca").value = ordine.marca_id || "";
+    document.getElementById("ordineModello").value = ordine.modello_id || "";
     document.getElementById("ordineNote").value = ordine.note || "";
     setContrattoModalState(ordine.contratto_finito == 1);
-    if (ordine.cliente_id && clienteSearchOrdine) {
-      await clienteSearchOrdine.loadData();
-      clienteSearchOrdine.setValue(ordine.cliente_id);
-    }
-    if (ordine.modello_id && marcaModelloSearchOrdine) {
-      await marcaModelloSearchOrdine.loadData();
-      marcaModelloSearchOrdine.setValue(ordine.modello_id);
-      if (ordine.marca_id) {
-        const mh = document.getElementById("ordineMarca");
-        if (mh) mh.value = ordine.marca_id;
-      }
-    }
+
+    setTimeout(() => {
+      initSelectSearch(
+        "ordineClienteSearch",
+        allClienti.map((c) => ({ value: c.id, label: c.nome })),
+        "ordineCliente",
+        ordine.cliente_id,
+      );
+
+      const marche = allModelli
+        .map((m) => ({ id: m.marche_id, nome: m.marca_nome }))
+        .filter(
+          (m, i, arr) => m.id && arr.findIndex((x) => x.id === m.id) === i,
+        );
+
+      initSelectSearch(
+        "ordineMarcaSearch",
+        marche.map((m) => ({ value: m.id, label: m.nome })),
+        "ordineMarca",
+        ordine.marca_id,
+      );
+
+      const modelliFiltered = allModelli.filter(
+        (m) => m.marche_id == ordine.marca_id,
+      );
+
+      initSelectSearch(
+        "ordineModelloSearch",
+        modelliFiltered.map((m) => ({ value: m.id, label: m.nome })),
+        "ordineModello",
+        ordine.modello_id,
+      );
+    }, 100);
   } else {
     title.textContent = "Nuovo Preventivo";
     document.getElementById("ordineId").value = "";
-    document.getElementById("ordineData").value = new Date()
-      .toISOString()
-      .split("T")[0];
+
+    const today = new Date().toISOString().split("T")[0];
+    document.getElementById("ordineData").value = today;
+
+    setTimeout(() => {
+      initSelectSearch(
+        "ordineClienteSearch",
+        allClienti.map((c) => ({ value: c.id, label: c.nome })),
+        "ordineCliente",
+      );
+
+      const marche = allModelli
+        .map((m) => ({ id: m.marche_id, nome: m.marca_nome }))
+        .filter(
+          (m, i, arr) => m.id && arr.findIndex((x) => x.id === m.id) === i,
+        );
+
+      initSelectSearch(
+        "ordineMarcaSearch",
+        marche.map((m) => ({ value: m.id, label: m.nome })),
+        "ordineMarca",
+      );
+
+      initSelectSearch("ordineModelloSearch", [], "ordineModello");
+    }, 100);
   }
 
   modal.classList.add("active");
@@ -946,8 +1075,8 @@ async function loadClientiForSelect() {
   try {
     const res = await fetch(`${API_URL}/clienti`);
     allClienti = await res.json();
-  } catch (e) {
-    console.error("Errore caricamento clienti:", e);
+  } catch (error) {
+    console.error("Errore caricamento clienti:", error);
   }
 }
 
@@ -955,17 +1084,21 @@ async function loadMarcheForSelect() {
   try {
     const res = await fetch(`${API_URL}/marche`);
     const marche = await res.json();
-    ["ordineMarca", "modelloMarca"].forEach((id) => {
-      const sel = document.getElementById(id);
-      if (sel)
-        sel.innerHTML =
+    const selects = [
+      document.getElementById("ordineMarca"),
+      document.getElementById("modelloMarca"),
+    ];
+    selects.forEach((select) => {
+      if (select) {
+        select.innerHTML =
           '<option value="">Seleziona marca</option>' +
           marche
             .map((m) => `<option value="${m.id}">${m.nome}</option>`)
             .join("");
+      }
     });
-  } catch (e) {
-    console.error("Errore caricamento marche:", e);
+  } catch (error) {
+    console.error("Errore caricamento marche:", error);
   }
 }
 
@@ -973,27 +1106,32 @@ async function loadModelliForSelect() {
   try {
     const res = await fetch(`${API_URL}/modelli`);
     allModelli = await res.json();
-    populateOrdineModelliByMarca(
-      document.getElementById("ordineMarca")?.value || "",
-    );
-  } catch (e) {
-    console.error("Errore caricamento modelli:", e);
+    const currentMarcaId = document.getElementById("ordineMarca")?.value || "";
+    populateOrdineModelliByMarca(currentMarcaId);
+  } catch (error) {
+    console.error("Errore caricamento modelli:", error);
   }
 }
 
 function populateOrdineModelliByMarca(marcaId) {
   const select = document.getElementById("ordineModello");
   if (!select) return;
+
   const source = Array.isArray(allModelli) ? allModelli : [];
-  const filtered = marcaId
-    ? source.filter((m) => String(m.marche_id) === String(marcaId))
-    : source;
+  const filtered =
+    marcaId && marcaId !== ""
+      ? source.filter(
+        (m) => m.marche_id && String(m.marche_id) === String(marcaId),
+      )
+      : source;
+
   select.innerHTML =
     '<option value="">Seleziona modello</option>' +
     filtered
       .map(
         (m) =>
-          `<option value="${m.id}">${m.nome}${m.marca_nome ? ` (${m.marca_nome})` : ""}</option>`,
+          `<option value="${m.id}">${m.nome}${m.marca_nome ? ` (${m.marca_nome})` : ""
+          }</option>`,
       )
       .join("");
 }
@@ -1008,50 +1146,65 @@ async function deleteOrdine(id) {
     "Sei sicuro di voler eliminare questo preventivo?",
     "Conferma Eliminazione",
   );
+
   if (!conferma) return;
+
   try {
     const res = await fetch(`${API_URL}/ordini/${id}`, { method: "DELETE" });
     const data = await res.json();
+
     if (res.ok) {
       showNotification("Preventivo eliminato con successo!", "success");
       loadOrdini();
     } else {
       showNotification(data.error || "Errore durante l'eliminazione", "error");
     }
-  } catch {
+  } catch (error) {
     showNotification("Errore di connessione", "error");
   }
 }
 
 document.getElementById("formOrdine").addEventListener("submit", async (e) => {
   e.preventDefault();
+
   const id = document.getElementById("ordineId").value;
-  const cliente_id = document.getElementById("ordineCliente").value;
+  const cliente_id = document.getElementById("ordineCliente").value; // Hidden input
   const data_movimento = document.getElementById("ordineData").value;
   const marca_id = document.getElementById("ordineMarca").value || null;
-  const modello_id = document.getElementById("ordineModello").value || null;
-  const note = document.getElementById("ordineNote").value.trim();
-  const contratto_finito =
-    document.getElementById("ordineContrattoFinito").value === "1";
+  const modello_id = document.getElementById("ordineModello").value || null; // Hidden input
 
+  // DEBUG: Verifica valori
+  console.log("=== DEBUG SUBMIT ORDINE ===");
+  console.log("modello_id:", modello_id);
+  console.log("marca_id:", marca_id);
+  console.log("allModelli:", allModelli);
+  console.log("allModelli.length:", allModelli?.length);
+
+  const note = document.getElementById("ordineNote").value.trim();
+  const contratto_finito = document.getElementById("ordineContrattoFinito").value === "1";
+
+  // Validazione cliente
   if (!cliente_id) {
     showNotification("Seleziona un cliente dalla lista", "warning");
     return;
   }
 
+  // Validazione modello (solo se allModelli è caricato)
   if (modello_id && Array.isArray(allModelli) && allModelli.length > 0) {
     const modello = allModelli.find((m) => String(m.id) === String(modello_id));
-    if (
-      modello &&
-      marca_id &&
-      modello.marche_id &&
-      String(modello.marche_id) !== String(marca_id)
-    ) {
-      showNotification(
-        "Il modello selezionato non appartiene alla marca indicata.",
-        "error",
+    if (!modello) {
+      console.warn(
+        "Modello non trovato in allModelli, ma procedo comunque con il salvataggio",
       );
-      return;
+      // Non blocchiamo il salvataggio, il backend farà la validazione finale
+    } else if (marca_id && modello.marche_id) {
+      if (String(modello.marche_id) !== String(marca_id)) {
+        showNotification(
+          "Il modello selezionato non appartiene alla marca indicata.",
+          "error",
+        );
+        return;
+      }
     }
   }
 
@@ -1073,7 +1226,9 @@ document.getElementById("formOrdine").addEventListener("submit", async (e) => {
         contratto_finito,
       }),
     });
+
     const data = await res.json();
+
     if (res.ok) {
       showNotification(
         id ? "Preventivo aggiornato!" : "Preventivo creato!",
@@ -1084,7 +1239,7 @@ document.getElementById("formOrdine").addEventListener("submit", async (e) => {
     } else {
       showNotification(data.error || "Errore durante il salvataggio", "error");
     }
-  } catch {
+  } catch (error) {
     showNotification("Errore di connessione", "error");
   }
 });
@@ -1095,79 +1250,114 @@ async function loadMarche() {
     const res = await fetch(`${API_URL}/marche`);
     allMarche = await res.json();
     marche = allMarche;
+
+    // 🔥 Ripristina il filtro salvato
     restoreMarcheFilter();
-  } catch {
-    console.error("Errore caricamento marche");
+  } catch (error) {
+    console.error("Errore caricamento marche:", error);
   }
 }
 
 function renderMarche() {
   const tbody = document.getElementById("marcheTableBody");
+
   if (marche.length === 0) {
     tbody.innerHTML =
       '<tr><td colspan="4" class="text-center">Nessuna marca presente</td></tr>';
     return;
   }
+
   tbody.innerHTML = marche
     .map(
       (m) => `
     <tr>
       <td><strong>${m.nome}</strong></td>
-      <td class="text-center-badge"><span class="prodotti-badge ${m.prodotti_count > 0 ? "has-products" : "empty"}">${m.prodotti_count || 0}</span></td>
-      <td class="text-center-badge"><span class="prodotti-badge ${m.preventivi_count > 0 ? "has-products" : "empty"}">${m.preventivi_count || 0}</span></td>
+      <td class="text-center-badge">
+        <span class="prodotti-badge ${m.prodotti_count > 0 ? "has-products" : "empty"
+        }">
+          ${m.prodotti_count || 0}
+        </span>
+      </td>
+      <td class="text-center-badge">
+        <span class="prodotti-badge ${m.preventivi_count > 0 ? "has-products" : "empty"
+        }">
+          ${m.preventivi_count || 0}
+        </span>
+      </td>
       <td class="text-right">
         <button class="btn-icon" onclick="editMarca(${m.id})" title="Modifica marca">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
         </button>
         <button class="btn-icon" onclick="deleteMarca(${m.id})" title="Elimina marca">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
         </button>
       </td>
-    </tr>`,
+    </tr>
+  `,
     )
     .join("");
 }
 
+// 🔥 SALVA E RIPRISTINA FILTRI MARCHE
 function saveMarcheFilter() {
-  localStorage.setItem(
-    "filter_marche_search",
-    document.getElementById("filterMarche")?.value || "",
-  );
+  const searchTerm = document.getElementById("filterMarche")?.value || "";
+  localStorage.setItem("filter_marche_search", searchTerm);
 }
+
 function restoreMarcheFilter() {
-  const s = localStorage.getItem("filter_marche_search") || "";
-  const i = document.getElementById("filterMarche");
-  if (i) i.value = s;
-  applyMarcheFilter(s.toLowerCase());
+  const savedSearch = localStorage.getItem("filter_marche_search") || "";
+  const searchInput = document.getElementById("filterMarche");
+
+  if (searchInput) {
+    searchInput.value = savedSearch;
+  }
+
+  // Applica sempre i filtri (anche se vuoti) per mostrare i dati
+  applyMarcheFilter(savedSearch.toLowerCase());
 }
-function applyMarcheFilter(s) {
-  marche = allMarche.filter((m) => m.nome.toLowerCase().includes(s));
+
+function applyMarcheFilter(searchTerm) {
+  marche = allMarche.filter((m) => m.nome.toLowerCase().includes(searchTerm));
   renderMarche();
 }
+
 document.getElementById("filterMarche")?.addEventListener("input", (e) => {
+  const searchTerm = e.target.value.toLowerCase();
   saveMarcheFilter();
-  applyMarcheFilter(e.target.value.toLowerCase());
+  applyMarcheFilter(searchTerm);
 });
 
 function openMarcaModal(marca = null) {
   const modal = document.getElementById("modalMarca");
-  document.getElementById("formMarca").reset();
+  const title = document.getElementById("modalMarcaTitle");
+  const form = document.getElementById("formMarca");
+
+  form.reset();
+
   if (marca) {
-    document.getElementById("modalMarcaTitle").textContent = "Modifica Marca";
+    title.textContent = "Modifica Marca";
     document.getElementById("marcaId").value = marca.id;
     document.getElementById("marcaNome").value = marca.nome;
   } else {
-    document.getElementById("modalMarcaTitle").textContent = "Nuova Marca";
+    title.textContent = "Nuova Marca";
     document.getElementById("marcaId").value = "";
   }
+
   modal.classList.add("active");
 }
+
 function closeMarcaModal() {
   document.getElementById("modalMarca").classList.remove("active");
 }
+
 function editMarca(id) {
-  const m = marche.find((x) => x.id === id);
-  if (m) openMarcaModal(m);
+  const marca = marche.find((m) => m.id === id);
+  if (marca) openMarcaModal(marca);
 }
 
 async function deleteMarca(id) {
@@ -1175,34 +1365,42 @@ async function deleteMarca(id) {
     "Sei sicuro di voler eliminare questa marca?",
     "Conferma Eliminazione",
   );
+
   if (!conferma) return;
+
   try {
     const res = await fetch(`${API_URL}/marche/${id}`, { method: "DELETE" });
     const data = await res.json();
+
     if (res.ok) {
       showNotification("Marca eliminata con successo!", "success");
       loadMarche();
     } else {
       showNotification(data.error || "Errore durante l'eliminazione", "error");
     }
-  } catch {
+  } catch (error) {
     showNotification("Errore di connessione", "error");
   }
 }
 
 document.getElementById("formMarca").addEventListener("submit", async (e) => {
   e.preventDefault();
+
   const id = document.getElementById("marcaId").value;
   const nome = document.getElementById("marcaNome").value.trim();
+
   const method = id ? "PUT" : "POST";
   const url = id ? `${API_URL}/marche/${id}` : `${API_URL}/marche`;
+
   try {
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nome }),
     });
+
     const data = await res.json();
+
     if (res.ok) {
       showNotification(id ? "Marca aggiornata!" : "Marca creata!", "success");
       closeMarcaModal();
@@ -1210,7 +1408,7 @@ document.getElementById("formMarca").addEventListener("submit", async (e) => {
     } else {
       showNotification(data.error || "Errore durante il salvataggio", "error");
     }
-  } catch {
+  } catch (error) {
     showNotification("Errore di connessione", "error");
   }
 });
@@ -1221,95 +1419,121 @@ async function loadModelli() {
     const res = await fetch(`${API_URL}/modelli`);
     allModelli = await res.json();
     modelli = allModelli;
+
+    // 🔥 Ripristina il filtro salvato
     restoreModelliFilter();
-  } catch {
-    console.error("Errore caricamento modelli");
+  } catch (error) {
+    console.error("Errore caricamento modelli:", error);
   }
 }
 
 function renderModelli() {
   const tbody = document.getElementById("modelliTableBody");
+
   if (modelli.length === 0) {
     tbody.innerHTML =
       '<tr><td colspan="4" class="text-center">Nessun modello presente</td></tr>';
     return;
   }
+
   tbody.innerHTML = modelli
     .map(
       (m) => `
     <tr>
       <td><strong>${m.nome}</strong></td>
       <td>${m.marca_nome || "-"}</td>
-      <td class="text-center-badge"><span class="prodotti-badge ${m.ordini_count > 0 ? "has-products" : "empty"}">${m.ordini_count || 0}</span></td>
+      <td class="text-center-badge">
+        <span class="prodotti-badge ${m.ordini_count > 0 ? "has-products" : "empty"
+        }">
+          ${m.ordini_count || 0}
+        </span>
+      </td>
       <td class="text-right">
         <button class="btn-icon" onclick="editModello(${m.id})" title="Modifica modello">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
         </button>
         <button class="btn-icon" onclick="deleteModello(${m.id})" title="Elimina modello">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
         </button>
       </td>
-    </tr>`,
+    </tr>
+  `,
     )
     .join("");
 }
 
+// 🔥 SALVA E RIPRISTINA FILTRI MODELLI
 function saveModelliFilter() {
-  localStorage.setItem(
-    "filter_modelli_search",
-    document.getElementById("filterModelli")?.value || "",
-  );
+  const searchTerm = document.getElementById("filterModelli")?.value || "";
+  localStorage.setItem("filter_modelli_search", searchTerm);
 }
+
 function restoreModelliFilter() {
-  const s = localStorage.getItem("filter_modelli_search") || "";
-  const i = document.getElementById("filterModelli");
-  if (i) i.value = s;
-  applyModelliFilter(s.toLowerCase());
+  const savedSearch = localStorage.getItem("filter_modelli_search") || "";
+  const searchInput = document.getElementById("filterModelli");
+
+  if (searchInput) {
+    searchInput.value = savedSearch;
+  }
+
+  // Applica sempre i filtri (anche se vuoti) per mostrare i dati
+  applyModelliFilter(savedSearch.toLowerCase());
 }
-function applyModelliFilter(s) {
+
+function applyModelliFilter(searchTerm) {
   modelli = allModelli.filter(
     (m) =>
-      m.nome.toLowerCase().includes(s) ||
-      (m.marca_nome && m.marca_nome.toLowerCase().includes(s)),
+      m.nome.toLowerCase().includes(searchTerm) ||
+      (m.marca_nome && m.marca_nome.toLowerCase().includes(searchTerm)),
   );
   renderModelli();
 }
+
 document.getElementById("filterModelli")?.addEventListener("input", (e) => {
+  const searchTerm = e.target.value.toLowerCase();
   saveModelliFilter();
-  applyModelliFilter(e.target.value.toLowerCase());
+  applyModelliFilter(searchTerm);
 });
 
 async function openModelloModal(modello = null) {
   const modal = document.getElementById("modalModello");
-  document.getElementById("formModello").reset();
-  if (!marcaSearchModello) {
-    await initModelloSearchableSelects();
-  } else {
-    marcaSearchModello.reset();
-    await marcaSearchModello.loadData();
-  }
+  const title = document.getElementById("modalModelloTitle");
+  const form = document.getElementById("formModello");
+
+  // Inizializza il campo di ricerca searchable per la marca
+  await initModelloSearchableSelect();
+
+  form.reset();
+
   if (modello) {
-    document.getElementById("modalModelloTitle").textContent =
-      "Modifica Modello";
+    title.textContent = "Modifica Modello";
     document.getElementById("modelloId").value = modello.id;
     document.getElementById("modelloNome").value = modello.nome;
+
+    // Imposta la marca selezionata nel campo searchable
     if (modello.marche_id && marcaSearchModello) {
-      await marcaSearchModello.loadData();
       marcaSearchModello.setValue(modello.marche_id);
     }
   } else {
-    document.getElementById("modalModelloTitle").textContent = "Nuovo Modello";
+    title.textContent = "Nuovo Modello";
     document.getElementById("modelloId").value = "";
   }
+
   modal.classList.add("active");
 }
 
 function closeModelloModal() {
   document.getElementById("modalModello").classList.remove("active");
 }
+
 function editModello(id) {
-  const m = modelli.find((x) => x.id === id);
-  if (m) openModelloModal(m);
+  const modello = modelli.find((m) => m.id === id);
+  if (modello) openModelloModal(modello);
 }
 
 async function deleteModello(id) {
@@ -1317,39 +1541,51 @@ async function deleteModello(id) {
     "Sei sicuro di voler eliminare questo modello?",
     "Conferma Eliminazione",
   );
+
   if (!conferma) return;
+
   try {
-    const res = await fetch(`${API_URL}/modelli/${id}`, { method: "DELETE" });
+    const res = await fetch(`${API_URL}/modelli/${id}`, {
+      method: "DELETE",
+    });
     const data = await res.json();
+
     if (res.ok) {
       showNotification("Modello eliminato con successo!", "success");
       loadModelli();
     } else {
       showNotification(data.error || "Errore durante l'eliminazione", "error");
     }
-  } catch {
+  } catch (error) {
     showNotification("Errore di connessione", "error");
   }
 }
 
 document.getElementById("formModello").addEventListener("submit", async (e) => {
   e.preventDefault();
+
   const id = document.getElementById("modelloId").value;
   const nome = document.getElementById("modelloNome").value.trim();
   const marche_id = document.getElementById("modelloMarca").value;
+
+  // ⚠️ VALIDAZIONE OBBLIGATORIA: La marca deve essere sempre selezionata
   if (!marche_id || marche_id === "" || marche_id === "null") {
     showNotification("Seleziona una marca per il modello", "error");
     return;
   }
+
   const method = id ? "PUT" : "POST";
   const url = id ? `${API_URL}/modelli/${id}` : `${API_URL}/modelli`;
+
   try {
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nome, marche_id }),
     });
+
     const data = await res.json();
+
     if (res.ok) {
       showNotification(
         id ? "Modello aggiornato!" : "Modello creato!",
@@ -1360,7 +1596,7 @@ document.getElementById("formModello").addEventListener("submit", async (e) => {
     } else {
       showNotification(data.error || "Errore durante il salvataggio", "error");
     }
-  } catch {
+  } catch (error) {
     showNotification("Errore di connessione", "error");
   }
 });
@@ -1371,18 +1607,20 @@ async function loadUtenti() {
     const res = await fetch(`${API_URL}/utenti`);
     utenti = await res.json();
     renderUtenti();
-  } catch {
-    console.error("Errore caricamento utenti");
+  } catch (error) {
+    console.error("Errore caricamento utenti:", error);
   }
 }
 
 function renderUtenti() {
   const tbody = document.getElementById("utentiTableBody");
+
   if (utenti.length === 0) {
     tbody.innerHTML =
       '<tr><td colspan="2" class="text-center">Nessun utente presente</td></tr>';
     return;
   }
+
   tbody.innerHTML = utenti
     .map(
       (u) => `
@@ -1390,52 +1628,61 @@ function renderUtenti() {
       <td><strong>${u.nome}</strong></td>
       <td class="text-right">
         <button class="btn-icon" onclick="editUtente(${u.id})" title="Modifica utente">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
         </button>
         <button class="btn-icon" onclick="deleteUtente(${u.id})" title="Elimina utente">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
         </button>
       </td>
-    </tr>`,
+    </tr>
+  `,
     )
     .join("");
 }
 
 function openUtenteModal(utente = null) {
   const modal = document.getElementById("modalUtente");
+  const title = document.getElementById("modalUtenteTitle");
+  const form = document.getElementById("formUtente");
   const passwordInput = document.getElementById("utentePassword");
-  document.getElementById("formUtente").reset();
+
+  form.reset();
+
   const passwordLabel = document.getElementById("utentePasswordLabel");
   const passwordHelp = document.getElementById("passwordHelp");
+
   if (utente) {
-    document.getElementById("modalUtenteTitle").textContent = "Modifica Utente";
+    title.textContent = "Modifica Utente";
     document.getElementById("utenteId").value = utente.id;
     document.getElementById("utenteNome").value = utente.nome;
     passwordInput.removeAttribute("required");
     passwordInput.placeholder = "Lascia vuoto per non cambiare";
     if (passwordLabel) passwordLabel.textContent = "Password";
-    if (passwordHelp)
-      passwordHelp.textContent =
-        "Lascia vuoto per mantenere la password attuale";
+    if (passwordHelp) passwordHelp.textContent = "Lascia vuoto per mantenere la password attuale";
   } else {
-    document.getElementById("modalUtenteTitle").textContent = "Nuovo Utente";
+    title.textContent = "Nuovo Utente";
     document.getElementById("utenteId").value = "";
     passwordInput.setAttribute("required", "");
     passwordInput.placeholder = "password";
     if (passwordLabel) passwordLabel.textContent = "Password *";
-    if (passwordHelp)
-      passwordHelp.textContent =
-        "Minimo 8 caratteri, una maiuscola, una minuscola e un numero";
+    if (passwordHelp) passwordHelp.textContent = "Minimo 8 caratteri, una maiuscola, una minuscola e un numero";
   }
+
   modal.classList.add("active");
 }
 
 function closeUtenteModal() {
   document.getElementById("modalUtente").classList.remove("active");
 }
+
 function editUtente(id) {
-  const u = utenti.find((x) => x.id === id);
-  if (u) openUtenteModal(u);
+  const utente = utenti.find((u) => u.id === id);
+  if (utente) openUtenteModal(utente);
 }
 
 async function deleteUtente(id) {
@@ -1443,37 +1690,46 @@ async function deleteUtente(id) {
     "Sei sicuro di voler eliminare questo utente?",
     "Conferma Eliminazione",
   );
+
   if (!conferma) return;
+
   try {
     const res = await fetch(`${API_URL}/utenti/${id}`, { method: "DELETE" });
     const data = await res.json();
+
     if (res.ok) {
       showNotification("Utente eliminato con successo!", "success");
       loadUtenti();
     } else {
       showNotification(data.error || "Errore durante l'eliminazione", "error");
     }
-  } catch {
+  } catch (error) {
     showNotification("Errore di connessione", "error");
   }
 }
 
 document.getElementById("formUtente").addEventListener("submit", async (e) => {
   e.preventDefault();
+
   const id = document.getElementById("utenteId").value;
   const nome = document.getElementById("utenteNome").value.trim();
   const password = document.getElementById("utentePassword").value;
+
   const method = id ? "PUT" : "POST";
   const url = id ? `${API_URL}/utenti/${id}` : `${API_URL}/utenti`;
+
   const body = { nome };
   if (password) body.password = password;
+
   try {
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
+
     const data = await res.json();
+
     if (res.ok) {
       showNotification(id ? "Utente aggiornato!" : "Utente creato!", "success");
       closeUtenteModal();
@@ -1481,7 +1737,7 @@ document.getElementById("formUtente").addEventListener("submit", async (e) => {
     } else {
       showNotification(data.error || "Errore durante il salvataggio", "error");
     }
-  } catch {
+  } catch (error) {
     showNotification("Errore di connessione", "error");
   }
 });
@@ -1500,7 +1756,10 @@ function formatDate(dateString) {
 function formatDateForInput(dateString) {
   if (!dateString) return "";
   const date = new Date(dateString);
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function showNotification(message, type = "info", duration = 5000) {
@@ -1508,10 +1767,13 @@ function showNotification(message, type = "info", duration = 5000) {
   const notification = document.createElement("div");
   notification.className = `notification notification-${type}`;
   notification.innerHTML = message;
+
   container.appendChild(notification);
+
   setTimeout(() => {
     notification.classList.add("show");
   }, 10);
+
   setTimeout(() => {
     notification.classList.remove("show");
     setTimeout(() => {
@@ -1525,24 +1787,41 @@ function showConfirmModal(message, title = "Conferma") {
     const modal = document.createElement("div");
     modal.className = "modal active";
     modal.style.zIndex = "10000";
+
     modal.innerHTML = `
       <div class="modal-content" style="max-width: 450px;">
-        <div class="modal-header"><h2>${title}</h2></div>
-        <div class="modal-body"><p style="font-size: 16px; line-height: 1.6; color: #334155;">${message}</p></div>
-        <div class="modal-footer" style="display: flex; gap: 12px; justify-content: flex-end;">
-          <button type="button" class="btn-cancel" style="padding: 10px 24px; border: 2px solid #e2e8f0; background: white; color: #64748b; border-radius: 8px; cursor: pointer; font-weight: 600;">Annulla</button>
-          <button type="button" class="btn-confirm" style="padding: 10px 24px; border: none; background: #ef4444; color: white; border-radius: 8px; cursor: pointer; font-weight: 600;">Conferma</button>
+        <div class="modal-header">
+          <h2>${title}</h2>
         </div>
-      </div>`;
+        <div class="modal-body">
+          <p style="font-size: 16px; line-height: 1.6; color: #334155;">${message}</p>
+        </div>
+        <div class="modal-footer" style="display: flex; gap: 12px; justify-content: flex-end;">
+          <button type="button" class="btn-cancel" style="padding: 10px 24px; border: 2px solid #e2e8f0; background: white; color: #64748b; border-radius: 8px; cursor: pointer; font-weight: 600;">
+            Annulla
+          </button>
+          <button type="button" class="btn-confirm" style="padding: 10px 24px; border: none; background: #ef4444; color: white; border-radius: 8px; cursor: pointer; font-weight: 600;">
+            Conferma
+          </button>
+        </div>
+      </div>
+    `;
+
     document.body.appendChild(modal);
-    modal.querySelector(".btn-cancel").addEventListener("click", () => {
+
+    const btnCancel = modal.querySelector(".btn-cancel");
+    const btnConfirm = modal.querySelector(".btn-confirm");
+
+    btnCancel.addEventListener("click", () => {
       modal.remove();
       resolve(false);
     });
-    modal.querySelector(".btn-confirm").addEventListener("click", () => {
+
+    btnConfirm.addEventListener("click", () => {
       modal.remove();
       resolve(true);
     });
+
     modal.addEventListener("click", (e) => {
       if (e.target === modal) {
         modal.remove();
@@ -1550,13 +1829,6 @@ function showConfirmModal(message, title = "Conferma") {
       }
     });
   });
-}
-
-function closeConfirmModal() {
-  document.getElementById("confirmModal")?.classList.remove("active");
-}
-function closeAlertModal() {
-  document.getElementById("alertModal")?.classList.remove("active");
 }
 
 // ==================== STAMPA PREVENTIVI PER CLIENTE ====================
@@ -1570,18 +1842,20 @@ async function loadCompanyInfoForPrint() {
       return companyInfoPrintCache;
     }
     const response = await fetch("company-info.json");
-    if (!response.ok) throw new Error();
+    if (!response.ok) throw new Error(`Errore caricamento: ${response.status}`);
     companyInfoPrintCache = await response.json();
     return companyInfoPrintCache;
-  } catch {
+  } catch (error) {
+    console.error("Errore caricamento company-info.json:", error);
     return companyInfoPrintCache;
   }
 }
 
 function groupOrdiniByCliente(ordini) {
-  return ordini.reduce((groups, o) => {
-    if (!groups[o.cliente_id]) groups[o.cliente_id] = [];
-    groups[o.cliente_id].push(o);
+  return ordini.reduce((groups, ordine) => {
+    const clienteId = ordine.cliente_id;
+    if (!groups[clienteId]) groups[clienteId] = [];
+    groups[clienteId].push(ordine);
     return groups;
   }, {});
 }
@@ -1596,7 +1870,7 @@ function generatePrintHeader(company) {
   const logoPath = company.logo || "img/Logo.png";
   return `
     <div class="print-header" style="text-align:center;margin-bottom:30px;border-bottom:3px solid #333;padding-bottom:25px;">
-      <img src="${logoPath}" alt="Logo" style="max-width:200px;height:auto;margin-bottom:15px;display:block;margin-left:auto;margin-right:auto;" />
+      <img src="${logoPath}" alt="Logo Azienda" style="max-width:200px;height:auto;margin-bottom:15px;display:block;margin-left:auto;margin-right:auto;" />
       <h1 style="margin:10px 0 5px 0;font-size:26px;font-weight:bold;color:#2c3e50;">${company.name || "Riepilogo Preventivi"}</h1>
       <p style="margin:3px 0;font-size:13px;color:#555;">${company.address || ""}, ${company.cap || ""} ${company.city || ""} (${company.province || ""})</p>
       <p style="margin:3px 0;font-size:12px;color:#555;">${company.country || "Italia"}</p>
@@ -1604,51 +1878,62 @@ function generatePrintHeader(company) {
         <p style="margin:3px 0;font-size:11px;color:#666;"><strong>P.IVA:</strong> ${company.piva || ""}</p>
         <p style="margin:3px 0;font-size:11px;color:#666;"><strong>Tel:</strong> ${formatPhoneNumber(company.phone) || ""} | <strong>Email:</strong> ${company.email || ""}</p>
       </div>
-    </div>`;
+    </div>
+  `;
 }
 
 function generateClienteSection(cliente, ordiniCliente) {
   const ordiniOrdinati = sortOrdiniByDateDesc(ordiniCliente);
   return `
   <div class="cliente-section" style="margin-bottom:30px;page-break-inside:avoid;">
-    <div style="background:#f5f5f5;padding:15px;border-radius:6px;margin-bottom:15px;border-left:5px solid #2980b9;">
-      <h2 style="margin:0 0 8px 0;font-size:17px;color:#2980b9;font-weight:bold;">${cliente.nome || "N/A"}</h2>
-      <p style="margin:4px 0;font-size:12px;color:#555;"><strong>📱 Cell:</strong> ${cliente.num_tel ? formatPhoneNumber(cliente.num_tel) : "No"}</p>
-      <p style="margin:4px 0;font-size:12px;color:#555;"><strong>✉️ Email:</strong> ${cliente.email || "No"}</p>
-      <p style="margin:4px 0;font-size:12px;color:#555;"><strong>📅 Data Passaggio/Ricontatto:</strong> ${cliente.data_passaggio ? formatDate(cliente.data_passaggio) : "No"}</p>
-      <p style="margin:4px 0;"><span style="display:inline-block;padding:3px 12px;border-radius:99px;font-size:11px;font-weight:700;${cliente.flag_ricontatto == 1 ? "background:#ede9fe;color:#4c1d95;border:1px solid #c4b5fd;" : "background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;"}">${cliente.flag_ricontatto == 1 ? "📱 Ricontattato" : "⏳ Da ricontattare"}</span></p>
-      <p style="margin:8px 0 0 0;font-size:11px;color:#777;font-style:italic;">Totale preventivi: <strong>${ordiniOrdinati.length}</strong></p>
+  <div style="background:#f5f5f5;padding:15px;border-radius:6px;margin-bottom:15px;border-left:5px solid #2980b9;">
+  <h2 style="margin:0 0 8px 0;font-size:17px;color:#2980b9;font-weight:bold;">${cliente.nome || "N/A"}</h2>
+  <p style="margin:4px 0;font-size:12px;color:#555;">
+  <strong>📱 Cell:</strong> ${cliente.num_tel ? formatPhoneNumber(cliente.num_tel) : "No"}
+  </p>
+  <p style="margin:4px 0;font-size:12px;color:#555;">
+  <strong>✉️ Email:</strong> ${cliente.email || "No"}
+  </p>
+  <p style="margin:4px 0;font-size:12px;color:#555;">
+  <strong>📅 Data Passaggio/Ricontatto:</strong> ${cliente.data_passaggio ? formatDate(cliente.data_passaggio) : "No"}
+  </p>
+  <p style="margin:4px 0;"><span style="display:inline-block;padding:3px 12px;border-radius:99px;font-size:11px;font-weight:700;${cliente.flag_ricontatto == 1 ? 'background:#ede9fe;color:#4c1d95;border:1px solid #c4b5fd;' : 'background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;'}">${cliente.flag_ricontatto == 1 ? '📱 Ricontattato' : '⏳ Da ricontattare'}</span></p>
+  <p style="margin:8px 0 0 0;font-size:11px;color:#777;font-style:italic;">
+  Totale preventivi: <strong>${ordiniOrdinati.length}</strong>
+  </p>
+  </div>
+      <table style="width:100%;border-collapse:collapse;font-size:11px;">
+        <thead>
+          <tr style="background:#ecf0f1;border-bottom:2px solid #34495e;">
+            <th style="padding:10px;text-align:left;border:1px solid #bdc3c7;">Data Preventivo</th>
+            <th style="padding:10px;text-align:left;border:1px solid #bdc3c7;">Marca</th>
+            <th style="padding:10px;text-align:left;border:1px solid #bdc3c7;">Modello</th>
+            <th style="padding:10px;text-align:center;border:1px solid #bdc3c7;">Contratto</th>
+            <th style="padding:10px;text-align:left;border:1px solid #bdc3c7;">Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${ordiniOrdinati
+      .map(
+        (o, i) => `
+            <tr style="border-bottom:1px solid #ecf0f1;${i % 2 === 0 ? "background:#fafafa;" : ""}">
+              <td style="padding:10px;border:1px solid #ecf0f1;font-weight:bold;white-space:nowrap;">${formatDate(o.data_movimento)}</td>
+              <td style="padding:10px;border:1px solid #ecf0f1;">${o.marca_nome || "-"}</td>
+              <td style="padding:10px;border:1px solid #ecf0f1;">${o.modello_nome || "-"}</td>
+              <td style="padding:10px;border:1px solid #ecf0f1;text-align:center;">
+                <span style="display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;${o.contratto_finito ? 'background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;' : 'background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;'}">
+                  ${o.contratto_finito ? "✅ concluso" : "🔴 Non concluso"}
+                </span>
+              </td>
+              <td style="padding:10px;border:1px solid #ecf0f1;">${o.note || "-"}</td>
+            </tr>
+          `,
+      )
+      .join("")}
+        </tbody>
+      </table>
     </div>
-    <table style="width:100%;border-collapse:collapse;font-size:11px;">
-      <thead>
-        <tr style="background:#ecf0f1;border-bottom:2px solid #34495e;">
-          <th style="padding:10px;text-align:left;border:1px solid #bdc3c7;">Data Preventivo</th>
-          <th style="padding:10px;text-align:left;border:1px solid #bdc3c7;">Marca</th>
-          <th style="padding:10px;text-align:left;border:1px solid #bdc3c7;">Modello</th>
-          <th style="padding:10px;text-align:center;border:1px solid #bdc3c7;">Contratto</th>
-          <th style="padding:10px;text-align:left;border:1px solid #bdc3c7;">Note</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${ordiniOrdinati
-          .map(
-            (o, i) => `
-          <tr style="border-bottom:1px solid #ecf0f1;${i % 2 === 0 ? "background:#fafafa;" : ""}">
-            <td style="padding:10px;border:1px solid #ecf0f1;font-weight:bold;white-space:nowrap;">${formatDate(o.data_movimento)}</td>
-            <td style="padding:10px;border:1px solid #ecf0f1;">${o.marca_nome || "-"}</td>
-            <td style="padding:10px;border:1px solid #ecf0f1;">${o.modello_nome || "-"}</td>
-            <td style="padding:10px;border:1px solid #ecf0f1;text-align:center;">
-              <span style="display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;${o.contratto_finito ? "background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;" : "background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;"}">
-                ${o.contratto_finito ? "✅ concluso" : "🔴 Non concluso"}
-              </span>
-            </td>
-            <td style="padding:10px;border:1px solid #ecf0f1;">${o.note || "-"}</td>
-          </tr>`,
-          )
-          .join("")}
-      </tbody>
-    </table>
-  </div>`;
+  `;
 }
 
 function generatePrintDocumentOrdiniPerCliente(ordini, companyWrapper) {
@@ -1671,16 +1956,43 @@ function generatePrintDocumentOrdiniPerCliente(ordini, companyWrapper) {
     .map((s) => JSON.parse(s))
     .sort((a, b) => a.nome.localeCompare(b.nome, "it"));
 
-  return `<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8" /><title>Stampa Preventivi per Cliente</title>
-    <style>body{font-family:Arial,sans-serif;line-height:1.6;margin:0;padding:0;}.print-container{max-width:210mm;margin:0 auto;padding:20mm;}
-    @media print{body{margin:0;padding:0;}.print-container{max-width:100%;padding:0;margin:0;}.cliente-section{page-break-inside:avoid;margin-bottom:40px;}}</style>
-    </head><body><div class="print-container">${generatePrintHeader(company)}${clientiUnici.map((c) => generateClienteSection(c, gruppi[c.id] || [])).join("")}
-    <div style="margin-top:20px;text-align:center;font-size:10px;color:#999;border-top:1px solid #ddd;padding-top:10px;">
-      Documento generato il: ${new Date().toLocaleString("it-IT")}</div></div></body></html>`;
+  const header = generatePrintHeader(company);
+  const bodyClienti = clientiUnici
+    .map((c) => generateClienteSection(c, gruppi[c.id] || []))
+    .join("");
+
+  return `
+    <!DOCTYPE html>
+    <html lang="it">
+      <head>
+        <meta charset="UTF-8" />
+        <title>Stampa Preventivi per Cliente</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; }
+          .print-container { max-width: 210mm; margin: 0 auto; padding: 20mm; }
+          @media print {
+            body { margin: 0; padding: 0; }
+            .print-container { max-width: 100%; padding: 0; margin: 0; }
+            .cliente-section { page-break-inside: avoid; margin-bottom: 40px; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="print-container">
+          ${header}
+          ${bodyClienti}
+          <div style="margin-top:20px;text-align:center;font-size:10px;color:#999;border-top:1px solid #ddd;padding-top:10px;">
+            Documento generato il: ${new Date().toLocaleString("it-IT")}
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
 }
 
 async function printOrdiniDiretta() {
   try {
+    // Usa 'ordini' (array filtrato) invece di 'allOrdini' per stampare solo ciò che è visibile
     if (!ordini || !ordini.length) {
       showNotification(
         "Nessun preventivo da stampare. Controlla i filtri applicati.",
@@ -1694,8 +2006,11 @@ async function printOrdiniDiretta() {
       companyInfo,
     );
     const printFrame = document.createElement("iframe");
-    printFrame.style.cssText =
-      "position:absolute;left:-9999px;width:0;height:0;border:0;";
+    printFrame.style.position = "absolute";
+    printFrame.style.left = "-9999px";
+    printFrame.style.width = "0";
+    printFrame.style.height = "0";
+    printFrame.style.border = "0";
     document.body.appendChild(printFrame);
     printFrame.contentDocument.open();
     printFrame.contentDocument.write(htmlPrint);
@@ -1709,7 +2024,8 @@ async function printOrdiniDiretta() {
       }, 250);
     };
     showNotification("Dialog stampa aperto!", "success");
-  } catch {
+  } catch (err) {
+    console.error("Errore stampa:", err);
     showNotification("Errore nella stampa", "error");
   }
 }
@@ -1724,8 +2040,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 500);
   }
 });
+// ==================== RICERCA AUTOCOMPLETE NEI SELECT ====================
+// Aggiungi questo codice DOPO le funzioni esistenti in script.js
 
-// ==================== SEARCHABLE SELECT ====================
+// ==================== SELECT SEARCHABLE PER MARCA E MODELLO ====================
+
+/**
+ * Crea un campo di ricerca searchable per select
+ * Versione migliorata con validazione e visual feedback
+ */
 function createSearchableSelect(
   containerId,
   inputId,
@@ -1740,18 +2063,28 @@ function createSearchableSelect(
     return null;
   }
 
+  // Crea struttura HTML
   container.innerHTML = `
     <div class="searchable-select-wrapper" style="position:relative;">
       <div class="searchable-input-wrapper" style="position:relative;">
-        <input type="text" id="${inputId}_search" class="searchable-select-input" placeholder="${placeholder}" autocomplete="off"
-          style="width:100%;padding:12px 50px 12px 18px;border:2px solid #e2e8f0;border-radius:12px;font-size:15px;transition:all 0.25s ease;background:white;"/>
-        <button type="button" class="clear-selection-btn"
-          style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:#ef4444;color:white;border:none;width:28px;height:28px;border-radius:50%;cursor:pointer;display:none;font-size:14px;font-weight:bold;transition:all 0.2s;">×</button>
+        <input 
+          type="text" 
+          id="${inputId}_search"
+          class="searchable-select-input" 
+          placeholder="${placeholder}"
+          autocomplete="off"
+          style="width:100%;padding:12px 50px 12px 18px;border:2px solid #e2e8f0;border-radius:12px;font-size:15px;transition:all 0.25s ease;background:white;"
+        />
+        <button 
+          type="button"
+          class="clear-selection-btn" 
+          style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:#ef4444;color:white;border:none;width:28px;height:28px;border-radius:50%;cursor:pointer;display:none;font-size:14px;font-weight:bold;transition:all 0.2s;"
+        >×</button>
       </div>
       <input type="hidden" id="${inputId}" name="${inputId}" />
       <div class="searchable-select-results" style="position:absolute;top:100%;left:0;right:0;max-height:300px;overflow-y:auto;background:white;border:2px solid #6366f1;border-top:none;border-radius:0 0 12px 12px;box-shadow:0 8px 20px rgba(0,0,0,0.15);display:none;z-index:1000;margin-top:-2px;"></div>
       <div class="selection-display" style="margin-top:8px;display:none;">
-        <div style="background:linear-gradient(135deg,#d1fae5 0%,#a7f3d0 100%);padding:10px 14px;border-radius:8px;border-left:4px solid #10b981;">
+        <div style="background:linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);padding:10px 14px;border-radius:8px;border-left:4px solid #10b981;">
           <div style="display:flex;align-items:center;justify-content:space-between;">
             <div>
               <span style="font-size:11px;color:#065f46;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Selezionato</span>
@@ -1762,7 +2095,8 @@ function createSearchableSelect(
           </div>
         </div>
       </div>
-    </div>`;
+    </div>
+  `;
 
   const searchInput = container.querySelector(`#${inputId}_search`);
   const hiddenInput = container.querySelector(`#${inputId}`);
@@ -1773,16 +2107,18 @@ function createSearchableSelect(
     ".selected-value-display",
   );
 
-  let allData = [],
-    currentData = [],
-    selectedValue = null,
-    selectedName = null;
+  let allData = [];
+  let currentData = [];
+  let selectedValue = null;
+  let selectedName = null;
 
+  // Carica dati
   async function loadData() {
     allData = await getData();
     currentData = allData;
   }
 
+  // Mostra risultati
   function showResults(filteredData) {
     if (filteredData.length === 0) {
       results.innerHTML =
@@ -1790,16 +2126,21 @@ function createSearchableSelect(
       results.style.display = "block";
       return;
     }
+
     results.innerHTML = filteredData
       .map(
         (item) => `
       <div class="result-item" data-id="${item.id}" data-nome="${item.nome}" style="padding:12px 18px;cursor:pointer;transition:all 0.2s ease;border-bottom:1px solid #f1f5f9;">
         <div style="font-weight:600;color:#334155;">${highlightText(item.nome, searchInput.value)}</div>
         ${item.extra ? `<div style="font-size:11px;color:#64748b;margin-top:2px;">${highlightText(item.extra, searchInput.value)}</div>` : ""}
-      </div>`,
+      </div>
+    `,
       )
       .join("");
+
     results.style.display = "block";
+
+    // Event listeners sui risultati
     results.querySelectorAll(".result-item").forEach((el) => {
       el.addEventListener("mouseenter", () => {
         el.style.background = "#f8fafc";
@@ -1815,6 +2156,7 @@ function createSearchableSelect(
     });
   }
 
+  // Evidenzia testo cercato
   function highlightText(text, search) {
     if (!search) return text;
     const regex = new RegExp(
@@ -1827,25 +2169,34 @@ function createSearchableSelect(
     );
   }
 
+  // Seleziona item
   function selectItem(id, nome) {
     selectedValue = id;
     selectedName = nome;
+
+    // Aggiorna campi
     searchInput.value = "";
     hiddenInput.value = id;
     results.style.display = "none";
+
+    // Mostra selezione
     searchInput.style.display = "none";
     selectionDisplay.style.display = "block";
     selectedValueDisplay.textContent = nome;
+    // Mostra extra (es. marca) se disponibile
     const extraDisplay = container.querySelector(".selected-extra-display");
     if (extraDisplay) {
       const item = currentData.find((d) => String(d.id) === String(id));
-      extraDisplay.textContent = item?.extra || "";
-      extraDisplay.style.display = item?.extra ? "block" : "none";
+      extraDisplay.textContent = item && item.extra ? item.extra : "";
+      extraDisplay.style.display = item && item.extra ? "block" : "none";
     }
     clearBtn.style.display = "block";
+
+    // Callback
     if (onSelect) onSelect(id, nome);
   }
 
+  // Reset/Clear
   function reset() {
     selectedValue = null;
     selectedName = null;
@@ -1854,12 +2205,17 @@ function createSearchableSelect(
     searchInput.style.display = "block";
     selectionDisplay.style.display = "none";
     selectedValueDisplay.textContent = "";
-    const ed = container.querySelector(".selected-extra-display");
-    if (ed) ed.textContent = "";
+    const extraDisplayReset = container.querySelector(".selected-extra-display");
+    if (extraDisplayReset) extraDisplayReset.textContent = "";
     clearBtn.style.display = "none";
     results.style.display = "none";
+
+    // Reset validazione
+    searchInput.setCustomValidity("");
+    hiddenInput.setCustomValidity("");
   }
 
+  // Click sul pulsante clear
   clearBtn.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -1867,39 +2223,67 @@ function createSearchableSelect(
     searchInput.focus();
   });
 
+  // Event input
   searchInput.addEventListener("input", async (e) => {
-    const term = e.target.value.toLowerCase().trim();
+    const searchTerm = e.target.value.toLowerCase().trim();
+
+    // Carica dati se necessario
     if (allData.length === 0) await loadData();
-    const filtered =
-      term === ""
-        ? currentData
-        : currentData.filter(
-            (item) =>
-              item.nome.toLowerCase().includes(term) ||
-              (item.email && item.email.toLowerCase().includes(term)) ||
-              (item.num_tel && item.num_tel.toLowerCase().includes(term)) ||
-              (item.extra && item.extra.toLowerCase().includes(term)),
-          );
-    showResults(filtered);
+
+    if (searchTerm === "") {
+      showResults(currentData);
+    } else {
+      const filtered = currentData.filter((item) => {
+        // Cerca nel nome
+        if (item.nome.toLowerCase().includes(searchTerm)) return true;
+
+        // Cerca nell'email se presente
+        if (item.email && item.email.toLowerCase().includes(searchTerm))
+          return true;
+
+        // Cerca nel numero di telefono se presente
+        if (item.num_tel && item.num_tel.toLowerCase().includes(searchTerm))
+          return true;
+
+        // Cerca nell'extra (es. marca del modello)
+        if (item.extra && item.extra.toLowerCase().includes(searchTerm))
+          return true;
+
+        return false;
+      });
+      showResults(filtered);
+    }
   });
 
+  // Focus
   searchInput.addEventListener("focus", async () => {
     if (allData.length === 0) await loadData();
-    const term = searchInput.value.toLowerCase().trim();
+
+    const searchTerm = searchInput.value.toLowerCase().trim();
     const filtered =
-      term === ""
+      searchTerm === ""
         ? currentData
-        : currentData.filter(
-            (item) =>
-              item.nome.toLowerCase().includes(term) ||
-              (item.email && item.email.toLowerCase().includes(term)) ||
-              (item.num_tel && item.num_tel.toLowerCase().includes(term)),
-          );
+        : currentData.filter((item) => {
+          // Cerca nel nome
+          if (item.nome.toLowerCase().includes(searchTerm)) return true;
+
+          // Cerca nell'email se presente
+          if (item.email && item.email.toLowerCase().includes(searchTerm))
+            return true;
+
+          // Cerca nel numero di telefono se presente
+          if (item.num_tel && item.num_tel.toLowerCase().includes(searchTerm))
+            return true;
+
+          return false;
+        });
+
     showResults(filtered);
     searchInput.style.borderColor = "#6366f1";
     searchInput.style.boxShadow = "0 0 0 4px rgba(99, 102, 241, 0.1)";
   });
 
+  // Blur
   searchInput.addEventListener("blur", () => {
     setTimeout(() => {
       results.style.display = "none";
@@ -1908,11 +2292,16 @@ function createSearchableSelect(
     }, 200);
   });
 
+  // Click fuori
   document.addEventListener("click", (e) => {
-    if (!container.contains(e.target)) results.style.display = "none";
+    if (!container.contains(e.target)) {
+      results.style.display = "none";
+    }
   });
 
+  // Validazione custom per campo required
   if (required) {
+    // Gestisci validazione manuale sul form submit
     const form = container.closest("form");
     if (form) {
       form.addEventListener(
@@ -1921,20 +2310,34 @@ function createSearchableSelect(
           if (!hiddenInput.value) {
             e.preventDefault();
             e.stopImmediatePropagation();
+
+            // Mostra messaggio di errore
             searchInput.style.borderColor = "#ef4444";
             searchInput.style.boxShadow = "0 0 0 4px rgba(239, 68, 68, 0.1)";
             searchInput.placeholder = "⚠️ Campo obbligatorio!";
             searchInput.focus();
+
+            // Ripristina dopo 3 secondi
             setTimeout(() => {
               searchInput.style.borderColor = "#e2e8f0";
               searchInput.style.boxShadow = "none";
               searchInput.placeholder = placeholder;
             }, 3000);
+
+            return false;
           }
         },
         true,
       );
     }
+
+    // Reset validazione su selezione
+    searchInput.addEventListener("input", () => {
+      if (hiddenInput.value) {
+        searchInput.style.borderColor = "#e2e8f0";
+        searchInput.style.boxShadow = "none";
+      }
+    });
   }
 
   return {
@@ -1956,11 +2359,38 @@ function createSearchableSelect(
   };
 }
 
+// Variabili globali per i searchable selects
 let clienteSearchOrdine = null;
-let marcaModelloSearchOrdine = null;
+let marcaModelloSearchOrdine = null; // campo unificato marca+modello
 let marcaSearchModello = null;
 
+// Inizializza SELECT searchable per il form Modello
+async function initModelloSearchableSelect() {
+  // SELECT MARCA nel form Modello
+  marcaSearchModello = createSearchableSelect(
+    "modelloMarcaSearch_container",
+    "modelloMarca",
+    "Cerca marca...",
+    async () => {
+      const res = await fetch(`${API_URL}/marche`);
+      const marche = await res.json();
+      return marche.map((m) => ({ id: m.id, nome: m.nome }));
+    },
+    (id, nome) => {
+      console.log("Marca selezionata per modello:", nome);
+    },
+    true, // required
+  );
+
+  // Carica i dati
+  if (marcaSearchModello) {
+    await marcaSearchModello.refreshData();
+  }
+}
+
+// Inizializza SELECT searchable per il form Ordine
 async function initOrdineSearchableSelects() {
+  // SELECT CLIENTE nel form Ordine
   clienteSearchOrdine = createSearchableSelect(
     "ordineClienteSearch_container",
     "ordineCliente",
@@ -1968,23 +2398,28 @@ async function initOrdineSearchableSelects() {
     async () => {
       const res = await fetch(`${API_URL}/clienti`);
       const clienti = await res.json();
-      return clienti.map((c) => ({
-        id: c.id,
-        nome: c.nome,
-        extra: [
-          c.num_tel ? `📞 ${c.num_tel}` : "",
-          c.email ? `✉️ ${c.email}` : "",
-        ]
-          .filter(Boolean)
-          .join(" • "),
-        num_tel: c.num_tel || "",
-        email: c.email || "",
-      }));
+      return clienti.map((c) => {
+        const extraParts = [];
+        if (c.num_tel) extraParts.push(`📞 ${c.num_tel}`);
+        if (c.email) extraParts.push(`✉️ ${c.email}`);
+        return {
+          id: c.id,
+          nome: c.nome,
+          extra: extraParts.join(" • "),
+          num_tel: c.num_tel || "",
+          email: c.email || "",
+        };
+      });
     },
-    () => {},
-    true,
+    (id, nome) => {
+      // Cliente selezionato
+    },
+    true, // required
   );
 
+  // SELECT UNIFICATO MARCA+MODELLO nel form Ordine
+  // Cerca per nome modello, mostra "Modello (Marca)" come extra
+  // Al click imposta entrambi gli hidden: ordineModello e ordineMarca
   marcaModelloSearchOrdine = createSearchableSelect(
     "ordineMarcaModelloSearch_container",
     "ordineModello",
@@ -2000,20 +2435,25 @@ async function initOrdineSearchableSelects() {
         marche_id: m.marche_id,
       }));
     },
-    (id) => {
-      const mod = allModelli.find((m) => String(m.id) === String(id));
-      if (mod?.marche_id) {
-        const mh = document.getElementById("ordineMarca");
-        if (mh) mh.value = mod.marche_id;
+    (id, nome) => {
+      // Quando seleziono un modello, imposta anche la marca
+      const modelloCompleto = allModelli.find(
+        (m) => String(m.id) === String(id),
+      );
+      if (modelloCompleto && modelloCompleto.marche_id) {
+        const marcaHidden = document.getElementById("ordineMarca");
+        if (marcaHidden) marcaHidden.value = modelloCompleto.marche_id;
       }
     },
-    true,
+    true, // required
   );
 
+  // Carica dati iniziali
   if (clienteSearchOrdine) await clienteSearchOrdine.loadData();
   if (marcaModelloSearchOrdine) await marcaModelloSearchOrdine.loadData();
 }
 
+// Inizializza SELECT searchable per il form Modello
 async function initModelloSearchableSelects() {
   marcaSearchModello = createSearchableSelect(
     "modelloMarcaSearch_container",
@@ -2024,12 +2464,135 @@ async function initModelloSearchableSelects() {
       const marche = await res.json();
       return marche.map((m) => ({ id: m.id, nome: m.nome }));
     },
-    () => {},
-    true,
+    (id, nome) => {
+      // Marca selezionata
+    },
+    true, // required
   );
+
   if (marcaSearchModello) await marcaSearchModello.loadData();
 }
 
-// Override openOrdineModal e openModelloModal con versioni searchable
-window.openOrdineModal = openOrdineModal;
-window.openModelloModal = openModelloModal;
+// Override openOrdineModal per inizializzare i searchable selects
+const _originalOpenOrdineModal = window.openOrdineModal;
+window.openOrdineModal = async function (ordine = null) {
+  await loadClientiForSelect();
+
+  const modal = document.getElementById("modalOrdine");
+  const title = document.getElementById("modalOrdineTitle");
+  const form = document.getElementById("formOrdine");
+
+  form.reset();
+  // Reset stato toggle contratto
+  setContrattoModalState(false);
+
+  // Inizializza searchable selects se non già fatto
+  if (!clienteSearchOrdine || !marcaModelloSearchOrdine) {
+    await initOrdineSearchableSelects();
+  } else {
+    // Reset se già esistono
+    clienteSearchOrdine.reset();
+    marcaModelloSearchOrdine.reset();
+    await clienteSearchOrdine.loadData();
+    await marcaModelloSearchOrdine.loadData();
+  }
+
+  if (ordine) {
+    title.textContent = "Modifica Preventivo";
+    document.getElementById("ordineId").value = ordine.id;
+    document.getElementById("ordineData").value = formatDateForInput(
+      ordine.data_movimento,
+    );
+    document.getElementById("ordineNote").value = ordine.note || "";
+    setContrattoModalState(ordine.contratto_finito == 1);
+
+    // Imposta valori nei searchable selects
+    if (ordine.cliente_id && clienteSearchOrdine) {
+      await clienteSearchOrdine.loadData();
+      clienteSearchOrdine.setValue(ordine.cliente_id);
+    }
+    // Imposta marca+modello nel campo unificato
+    if (ordine.modello_id && marcaModelloSearchOrdine) {
+      await marcaModelloSearchOrdine.loadData();
+      marcaModelloSearchOrdine.setValue(ordine.modello_id);
+      // imposta anche marca hidden direttamente
+      if (ordine.marca_id) {
+        const marcaHidden = document.getElementById("ordineMarca");
+        if (marcaHidden) marcaHidden.value = ordine.marca_id;
+      }
+    }
+  } else {
+    title.textContent = "Nuovo Preventivo";
+    document.getElementById("ordineId").value = "";
+
+    // Imposta data odierna
+    const today = new Date().toISOString().split("T")[0];
+    document.getElementById("ordineData").value = today;
+  }
+
+  modal.classList.add("active");
+};
+
+// Override openModelloModal per inizializzare searchable select marca
+const _originalOpenModelloModal = window.openModelloModal;
+window.openModelloModal = async function (modello = null) {
+  const modal = document.getElementById("modalModello");
+  const title = document.getElementById("modalModelloTitle");
+  const form = document.getElementById("formModello");
+
+  form.reset();
+
+  // Inizializza searchable select se non già fatto
+  if (!marcaSearchModello) {
+    await initModelloSearchableSelects();
+  } else {
+    marcaSearchModello.reset();
+    await marcaSearchModello.loadData();
+  }
+
+  if (modello) {
+    title.textContent = "Modifica Modello";
+    document.getElementById("modelloId").value = modello.id;
+    document.getElementById("modelloNome").value = modello.nome;
+
+    if (modello.marche_id && marcaSearchModello) {
+      await marcaSearchModello.loadData();
+      marcaSearchModello.setValue(modello.marche_id);
+    }
+  } else {
+    title.textContent = "Nuovo Modello";
+    document.getElementById("modelloId").value = "";
+  }
+
+  modal.classList.add("active");
+};
+
+// Funzione da chiamare quando apri il modal
+async function initOrdineSelects() {
+  // 1. Inizializza Ricerca CLIENTE (come concetto Marca)
+  if (window.clienteSearchOrdine) {
+    window.clienteSearchOrdine.onSelect = (id) => {
+      document.getElementById("ordineCliente").value = id;
+    };
+  }
+
+  // 2. Inizializza Ricerca MARCA+MODELLO unificato
+  if (window.marcaModelloSearchOrdine) {
+    window.marcaModelloSearchOrdine.onSelect = (id) => {
+      document.getElementById("ordineModello").value = id;
+      const modelloCompleto = allModelli.find((m) => String(m.id) === String(id));
+      if (modelloCompleto && modelloCompleto.marche_id) {
+        const marcaHidden = document.getElementById("ordineMarca");
+        if (marcaHidden) marcaHidden.value = modelloCompleto.marche_id;
+      }
+    };
+  }
+}
+// Funzioni per gestire i modali statici
+function closeConfirmModal() {
+  document.getElementById("confirmModal").classList.remove("active");
+}
+
+function closeAlertModal() {
+  document.getElementById("alertModal").classList.remove("active");
+}
