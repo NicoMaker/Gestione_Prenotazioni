@@ -211,7 +211,8 @@
               <p>Visualizza e gestisci i clienti</p>
             </div>
             <div class="filter-controls">
-              <div class="search-wrapper">
+              <div class="search-wrapper filter-date-wrapper">
+                <label class="filter-date-label filter-label-spacer" aria-hidden="true">&nbsp;</label>
                 <input
                   type="text"
                   id="filterClienti"
@@ -234,22 +235,20 @@
                   title="Filtra per data passaggio / ricontatto"
                 />
               </div>
-              <button
-                class="btn btn-primary"
-                onclick="openClienteModal()"
-                title="Aggiungi un nuovo cliente"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
+              <div class="filter-date-wrapper">
+                <label class="filter-date-label filter-label-spacer" aria-hidden="true">&nbsp;</label>
+                <button
+                  class="btn btn-primary"
+                  onclick="openClienteModal()"
+                  title="Aggiungi un nuovo cliente"
                 >
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                <span>Nuovo Cliente</span>
-              </button>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  <span>Nuovo Cliente</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -287,7 +286,8 @@
               <p>Visualizza e gestisci i preventivi</p>
             </div>
             <div class="filter-controls">
-              <div class="search-wrapper">
+              <div class="search-wrapper filter-date-wrapper">
+                <label class="filter-date-label filter-label-spacer" aria-hidden="true">&nbsp;</label>
                 <input
                   type="text"
                   id="filterOrdini"
@@ -328,41 +328,34 @@
                   title="Filtra per data passaggio / ricontatto"
                 />
               </div>
-              <button
-                class="btn btn-secondary"
-                onclick="printOrdiniDiretta()"
-                title="Stampa preventivi raggruppati per cliente"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <polyline points="6 9 6 2 18 2 18 9" />
-                  <path
-                    d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"
-                  />
-                  <rect x="6" y="14" width="12" height="8" />
-                </svg>
-                <span>Stampa per Cliente</span>
-              </button>
-              <button
-                class="btn btn-primary"
-                onclick="openOrdineModal()"
-                title="Crea un nuovo preventivo"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                <span>Nuovo Preventivo</span>
-              </button>
+              <div class="filter-date-wrapper">
+                <label class="filter-date-label filter-label-spacer" aria-hidden="true">&nbsp;</label>
+                <div class="filter-btns-row">
+                  <button
+                    class="btn btn-secondary"
+                    onclick="printOrdiniDiretta()"
+                    title="Stampa preventivi raggruppati per cliente"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 6 2 18 2 18 9" />
+                      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                      <rect x="6" y="14" width="12" height="8" />
+                    </svg>
+                    <span>Stampa per Cliente</span>
+                  </button>
+                  <button
+                    class="btn btn-primary"
+                    onclick="openOrdineModal()"
+                    title="Crea un nuovo preventivo"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="12" y1="5" x2="12" y2="19" />
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    <span>Nuovo Preventivo</span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 

@@ -965,6 +965,21 @@ tbody tr:hover {
   letter-spacing: 0.5px;
   padding-left: 2px;
   white-space: nowrap;
+  height: 18px;
+}
+
+/* Label invisibile usata come spaziatore per allineare elementi senza label */
+.filter-label-spacer {
+  visibility: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Gruppo di bottoni inline */
+.filter-btns-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
 .filter-input {
