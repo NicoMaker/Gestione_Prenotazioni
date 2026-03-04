@@ -6,6 +6,48 @@
     <title>Gestione Preventivi</title>
     <link rel="stylesheet" href="styles.css" />
     <link rel="icon" type="image/png" href="img/Logo.png" />
+  <style>
+    .filter-controls-preventivi {
+      flex-wrap: nowrap;
+      align-items: flex-end;
+    }
+    .filter-controls-preventivi .filter-input-preventivi {
+      min-width: 0;
+      width: 220px;
+    }
+    .filter-controls-preventivi .filter-date-wrapper .filter-input[type="date"] {
+      min-width: 0;
+      width: 170px;
+    }
+    .filter-controls-preventivi .filter-btns-row .btn {
+      height: 45px;
+    }
+    @media (max-width: 768px) {
+      .filter-controls-preventivi {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .filter-controls-preventivi .filter-date-wrapper {
+        width: 100%;
+      }
+      .filter-controls-preventivi .filter-input-preventivi,
+      .filter-controls-preventivi .filter-date-wrapper .filter-input[type="date"] {
+        width: 100%;
+        min-width: 0;
+      }
+      .filter-controls-preventivi .filter-btns-row {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        width: 100%;
+      }
+      .filter-controls-preventivi .filter-btns-row .btn {
+        flex: 1;
+        height: 48px;
+        font-size: 14px;
+      }
+    }
+  </style>
   </head>
 
   <body>
@@ -269,10 +311,10 @@
               <h1>Gestione Preventivi</h1>
               <p>Visualizza e gestisci i preventivi</p>
             </div>
-            <div class="filter-controls">
+            <div class="filter-controls filter-controls-preventivi">
               <div class="filter-date-wrapper">
                 <label class="filter-date-label filter-label-spacer" aria-hidden="true">&nbsp;</label>
-                <input type="text" id="filterOrdini" class="filter-input" placeholder="Cerca cliente, tel, email, marca..." title="Cerca per nome cliente, telefono, email, marca o modello" />
+                <input type="text" id="filterOrdini" class="filter-input filter-input-preventivi" placeholder="Cerca cliente, tel, email, marca..." title="Cerca per nome cliente, telefono, email, marca o modello" />
               </div>
               <div class="filter-date-wrapper">
                 <label class="filter-date-label" for="filterOrdiniDataPreventivo">
